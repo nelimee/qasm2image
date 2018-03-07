@@ -1,5 +1,3 @@
-Note: The code is currently being reviewed by people to ensure that I can publish it. It will be available soon, probably before 9th of March, 2018. The following README is an overview of what is done and currently works in local, but may be subject to minor or major changes before release.
-
 # qasm2image
 
 The qasm2image repository provides functions to represent quantum circuits written following the [OpenQASM](https://github.com/QISKit/qiskit-openqasm) specification.
@@ -93,6 +91,6 @@ in the repository.
 
 In order to use the work in this repository you have a strong obligation to cite (as stated in the license):
 
- 1. The author of the work (see on my GitHub page or [mail me](mailto:adrien.suau@grenoble-inp.org) if any doubt).
+ 1. The author of the work: Adrien Suau (see on my GitHub page or [mail me](mailto:adrien.suau@grenoble-inp.org) if any doubt).
 
  2. The CERFACS (Centre Européen de Recherche et de Formation Avancée en Calcul Scientifique).
