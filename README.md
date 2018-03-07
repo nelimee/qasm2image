@@ -4,6 +4,18 @@ Note: The code is currently being reviewed by people to ensure that I can publis
 
 The qasm2image repository provides functions to represent quantum circuits written following the [OpenQASM](https://github.com/QISKit/qiskit-openqasm) specification.
 
+## Not supported operations (TODO)
+
+### Classically controlled operations
+
+#### Description
+
+The operations controlled by classical bits are not correctly drawn.
+
+#### Example
+
+See test-case [`inverseqft1.qasm`](tests/qasm/inverseqft1.qasm)
+
 ## Installation
 
 ### Dependencies
@@ -53,8 +65,8 @@ with open('circuit.png', 'wb') as png_file:
 A wrapper can be found in the `tools/` directory. This wrapper can be used as follow:
 
 ```shell
->>> ./qasm2image.py -h
-usage: qasm2image.py [-h] [-b BASIS [BASIS ...]] [--hide-clbits]
+$ ./qasm2image.py -h
+usage: qasm2image.py [-h] [-b BASIS] [--hide-clbits] [-s SCALE]
                      input_file output_file
 
 Transform a quantum circuit in QASM format to an image format.
@@ -65,10 +77,13 @@ positional arguments:
 
 optional arguments:
   -h, --help            show this help message and exit
-  -b BASIS [BASIS ...], --basis BASIS [BASIS ...]
+  -b BASIS, --basis BASIS
                         a comma-separated list of gate names which represent
                         the gate basis in which the circuit will be decomposed
   --hide-clbits         if present, classical bits will not be represented
+  -s SCALE, --scale SCALE
+                        scale of the PNG image. SVG output is not affected by
+                        this parameter
 ```
 
 ## License
