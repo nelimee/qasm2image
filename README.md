@@ -2,18 +2,6 @@
 
 The qasm2image repository provides functions to represent quantum circuits written following the [OpenQASM](https://github.com/QISKit/qiskit-openqasm) specification.
 
-## Not supported operations (TODO)
-
-### Classically controlled operations
-
-#### Description
-
-The operations controlled by classical bits are not correctly drawn.
-
-#### Example
-
-See test-case [`inverseqft1.qasm`](tests/qasm/inverseqft1.qasm)
-
 ## Installation
 
 ### Dependencies
