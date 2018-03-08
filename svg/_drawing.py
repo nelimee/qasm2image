@@ -65,6 +65,28 @@ from . import _constants
 
 BitRankType = Dict[str, Sequence[int]] #pylint: disable=invalid-name
 
+def _draw_classical_double_line(drawing: Drawing,
+                                x1, y1, x2, y2) -> None:
+    """Draw a double line between (x1,y1) and (x2,y2).
+
+    Assumes that x1==x2 or y1==y2.
+    """
+    x_increment, y_increment = 0, 0
+    if x1 == x2:
+        x_increment = _constants.DOUBLE_LINES_SEPARATION
+    elif y1 == y2:
+        yLL_increment = _constants.DOUBLE_LINES_SEPARATION
+
+    drawing.add(drawing.line(start=(x1 - x_increment, y1 - y_increment),
+                             end=(x2 - x_increment, y2 - y_increment),
+                             stroke=_constants.GATE_BORDER_COLOR,
+                             stroke_width=_constants.STROKE_THICKNESS))
+    drawing.add(drawing.line(start=(x1 + x_increment, y1 + y_increment),
+                             end=(x2 + x_increment, y2 + y_increment),
+                             stroke=_constants.GATE_BORDER_COLOR,
+                             stroke_width=_constants.STROKE_THICKNESS))
+
+
 def _draw_line_between_qubits(drawing: Drawing,
                               bit_gate_rank: BitRankType,
                               control_qubit: int,
@@ -80,6 +102,22 @@ def _draw_line_between_qubits(drawing: Drawing,
                              end=(x_coord, y2_coord),
                              stroke=_constants.GATE_BORDER_COLOR,
                              stroke_width=_constants.STROKE_THICKNESS))
+
+def _draw_qubit_clbit_line(drawing: Drawing,
+                           bit_gate_rank: BitRankType,
+                           qubit: int,
+                           clbit: int,
+                           index_to_draw: int = None) -> None:
+
+    if index_to_draw is None:
+        index_to_draw, _ = _helpers.get_max_index(bit_gate_rank,
+                                                  qubits=[qubit],
+                                                  clbits=[clbit])
+    x_coord = _helpers.get_x_from_index(index_to_draw)
+    y1_coord = _helpers.get_y_from_quantum_register(qubit)
+    y2_coord = _helpers.get_y_from_classical_register(clbit, len(bit_gate_rank['qubits']))
+
+    _draw_classical_double_line(drawing, x_coord, y1_coord, x_coord, y2_coord)
 
 def _draw_cnot_cross(drawing: Drawing,
                      x_coord: float,
@@ -323,18 +361,25 @@ def _draw_registers_lines(drawing: Drawing,
                           circuit_width: int,
                           json_circuit: str,
                           show_clbits: bool) -> None:
-
-    register_number = json_circuit['header'].get('number_of_qubits', 0)
-    if show_clbits:
-        register_number += json_circuit['header'].get('number_of_clbits', 0)
-
+    # Initialise the y coordinate of the first register line
     y_coord = _constants.VERTICAL_BORDER
-    for _ in range(register_number):
+
+    # Start with quantum registers
+    quantum_register_number = json_circuit['header'].get('number_of_qubits', 0)
+    for _ in range(quantum_register_number):
         drawing.add(drawing.line(start=(0, y_coord),
                                  end=(circuit_width, y_coord),
-                                 stroke=_constants.REGISTER_LINES_COLOR,
+                                 stroke=_constants.GATE_BORDER_COLOR,
                                  stroke_width=_constants.STROKE_THICKNESS))
         y_coord += _constants.REGISTER_LINES_VERTICAL_SPACING
+
+    # And see if we want to plot classical registers.
+    if show_clbits:
+        classical_register_number = json_circuit['header'].get('number_of_clbits', 0)
+        for _ in range(classical_register_number):
+            _draw_classical_double_line(drawing, 0, y_coord, circuit_width, y_coord)
+            y_coord += _constants.REGISTER_LINES_VERTICAL_SPACING
+
 
 def _draw_json_circuit(json_circuit,
                        unit: str = 'px',
@@ -358,9 +403,10 @@ def _draw_json_circuit(json_circuit,
     """
     # Compute the width and height
     width, height = _helpers.get_dimensions(json_circuit, show_clbits)
-    width, height = str(round(width, round_index))+unit, str(round(height, round_index))+unit
+    width, height = round(width, round_index), round(height, round_index)
+    width_str, height_str = str(width)+unit, str(height)+unit
     # Create the drawing
-    drawing = Drawing(size=(width, height))
+    drawing = Drawing(size=(width_str, height_str))
     # Create the internal structure used by the drawing functions
     index_last_gate_on_reg = {'clbits': [0] * json_circuit['header'].get('number_of_clbits', 0),
                               'qubits': [0] * json_circuit['header'].get('number_of_qubits', 0)}
