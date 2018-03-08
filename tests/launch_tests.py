@@ -35,6 +35,14 @@
 
 import os
 
+use_colors = True
+try:
+    from colorama import Fore, Style
+except ImportError:
+    use_colors = False
+    print("colorama was not found on your Python installation. Colored output will not " +
+          "work. You can install colorama with pip: 'pip install colorama'.")
+
 from qasm2png import qasm2png
 
 this_directory = os.path.dirname(os.path.realpath(__file__)) #pylint: disable=invalid-name
@@ -43,10 +51,10 @@ test_files_directory = os.path.join(this_directory, "qasm") #pylint: disable=inv
 for root, dirs, files in os.walk(test_files_directory):
     for test_file in files:
         if test_file.endswith(".qasm"):
-
+            qasm_file_path = os.path.join(root, test_file)
+            printed_text = "[....] Testing with '{}'".format(qasm_file_path)
             try:
-                qasm_file_path = os.path.join(root, test_file)
-                print("Testing with '{}'...".format(qasm_file_path), end='', flush=True)
+                print(printed_text, end='\r', flush=True)
 
                 with open(qasm_file_path, 'r') as qasm_file:
                     qasm_str = qasm_file.read()
@@ -60,7 +68,13 @@ for root, dirs, files in os.walk(test_files_directory):
                     with open(png_file_path, 'wb') as png_file:
                         png_file.write(qasms[suffix])
             except Exception as exception: #pylint: disable=broad-except
-                print("\nException occured on file '{}' (see below for details).".format(test_file))
+                if use_colors:
+                    print(printed_text.replace("....", Fore.RED + "FAIL" + Style.RESET_ALL))
+                else:
+                    print(printed_text.replace("....", "FAIL"))
                 print(exception)
             else:
-                print(" OK")
+                if use_colors:
+                    print(printed_text.replace("....", Fore.GREEN + " OK " + Style.RESET_ALL))
+                else:
+                    print(printed_text.replace("....", " OK "))
