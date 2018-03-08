@@ -69,14 +69,17 @@ def _draw_classical_double_line(drawing: Drawing,
                                 x1, y1, x2, y2) -> None:
     """Draw a double line between (x1,y1) and (x2,y2).
 
-    Assumes that x1==x2 or y1==y2.
+    Raises:
+        NotImplementedError: when x1!=x2 and y1!=y2 (i.e. when the
+                         line is neither horizontal nor vertical).
     """
     x_increment, y_increment = 0, 0
     if x1 == x2:
         x_increment = _constants.DOUBLE_LINES_SEPARATION
     elif y1 == y2:
         y_increment = _constants.DOUBLE_LINES_SEPARATION
-
+    else:
+        raise NotImplementedError("The drawed line should be either horizontal or vertical.")
     drawing.add(drawing.line(start=(x1 - x_increment, y1 - y_increment),
                              end=(x2 - x_increment, y2 - y_increment),
                              stroke=_constants.GATE_BORDER_COLOR,
