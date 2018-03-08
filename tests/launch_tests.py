@@ -45,36 +45,51 @@ except ImportError:
 
 from qasm2png import qasm2png
 
-this_directory = os.path.dirname(os.path.realpath(__file__)) #pylint: disable=invalid-name
-test_files_directory = os.path.join(this_directory, "qasm") #pylint: disable=invalid-name
 
-for root, dirs, files in os.walk(test_files_directory):
-    for test_file in files:
-        if test_file.endswith(".qasm"):
-            qasm_file_path = os.path.join(root, test_file)
-            printed_text = "[....] Testing with '{}'".format(qasm_file_path)
-            try:
-                print(printed_text, end='\r', flush=True)
+def recursive_check_all_qasm_files(directory, exception_expected = False):
+    error_coloring_format = Fore.RED + '{}' + Style.RESET_ALL
+    ok_coloring_format = Fore.GREEN + '{}' + Style.RESET_ALL
+    def color_text(text, coloring_format):
+        if use_colors:
+            return coloring_format.format(text)
+        else:
+            return text
 
-                with open(qasm_file_path, 'r') as qasm_file:
-                    qasm_str = qasm_file.read()
-                qasms = {'simple': qasm2png(qasm_str),
-                         'no_clbits': qasm2png(qasm_str, show_clbits=False),
-                         'other_basis': qasm2png(qasm_str, basis='x,y,z,h,cx')}
-                for suffix in qasms:
-                    png_file_path = os.path.join(root,
-                                                 test_file.replace('.qasm',
-                                                                   "_{}.png".format(suffix)))
-                    with open(png_file_path, 'wb') as png_file:
-                        png_file.write(qasms[suffix])
-            except Exception as exception: #pylint: disable=broad-except
-                if use_colors:
-                    print(printed_text.replace("....", Fore.RED + "FAIL" + Style.RESET_ALL))
+    ok_text = color_text(" OK ", ok_coloring_format)
+    fail_text = color_text("FAIL", error_coloring_format)
+
+    on_exception_str = ok_text   if exception_expected else fail_text
+    no_exception_str = fail_text if exception_expected else ok_text
+
+    for root, dirs, files in os.walk(directory):
+        for test_file in files:
+            if test_file.endswith(".qasm"):
+                qasm_file_path = os.path.join(root, test_file)
+                printed_text = "[....] Testing with '{}'".format(qasm_file_path)
+                try:
+                    print(printed_text, end='\r', flush=True)
+
+                    with open(qasm_file_path, 'r') as qasm_file:
+                        qasm_str = qasm_file.read()
+                    qasms = {'simple': qasm2png(qasm_str),
+                             'no_clbits': qasm2png(qasm_str, show_clbits=False),
+                             'other_basis': qasm2png(qasm_str, basis='x,y,z,h,cx')}
+                    for suffix in qasms:
+                        png_file_path = os.path.join(root,
+                                                     test_file.replace('.qasm',
+                                                                       "_{}.png".format(suffix)))
+                        with open(png_file_path, 'wb') as png_file:
+                            png_file.write(qasms[suffix])
+                except Exception as exception: #pylint: disable=broad-except
+                    print(printed_text.replace("....", on_exception_str))
+                    print(exception)
                 else:
-                    print(printed_text.replace("....", "FAIL"))
-                print(exception)
-            else:
-                if use_colors:
-                    print(printed_text.replace("....", Fore.GREEN + " OK " + Style.RESET_ALL))
-                else:
-                    print(printed_text.replace("....", " OK "))
+                    print(printed_text.replace("....", no_exception_str))
+
+if __name__ == '__main__':
+    this_directory = os.path.dirname(os.path.realpath(__file__)) #pylint: disable=invalid-name
+    test_files_directory = os.path.join(this_directory, "examples") #pylint: disable=invalid-name
+
+    for directory in os.listdir(test_files_directory):
+        current_directory = os.path.join(test_files_directory, directory)
+        recursive_check_all_qasm_files(current_directory, exception_expected=(directory=="invalid"))
