@@ -184,10 +184,7 @@ def _draw_measure_gate(drawing: Drawing,
         yc_coord = _helpers.get_y_from_classical_register(target_clbit,
                                                           len(bit_gate_rank['qubits']))
         # Draw the line between the 2 bits
-        drawing.add(drawing.line(start=(x_coord, yq_coord),
-                                 end=(x_coord, yc_coord),
-                                 stroke=_constants.GATE_BORDER_COLOR,
-                                 stroke_width=_constants.STROKE_THICKNESS))
+        _draw_classical_double_line(drawing, x_coord, yq_coord, x_coord, yc_coord)
 
         # Draw the little thing that tell where we put the measure.
         drawing.add(drawing.rect(insert=(x_coord - _constants.MEASURE_GATE_CLBIT_SIZE/2,
