@@ -75,7 +75,7 @@ def _draw_classical_double_line(drawing: Drawing,
     if x1 == x2:
         x_increment = _constants.DOUBLE_LINES_SEPARATION
     elif y1 == y2:
-        yLL_increment = _constants.DOUBLE_LINES_SEPARATION
+        y_increment = _constants.DOUBLE_LINES_SEPARATION
 
     drawing.add(drawing.line(start=(x1 - x_increment, y1 - y_increment),
                              end=(x2 - x_increment, y2 - y_increment),
@@ -93,8 +93,8 @@ def _draw_line_between_qubits(drawing: Drawing,
                               target_qubit: int,
                               index_to_draw: int = None) -> None:
     if index_to_draw is None:
-        index_to_draw = _helpers.get_max_index(bit_gate_rank,
-                                               qubits=[control_qubit, target_qubit])
+        index_to_draw, _ = _helpers.get_max_index(bit_gate_rank,
+                                                  qubits=[control_qubit, target_qubit])
     x_coord = _helpers.get_x_from_index(index_to_draw)
     y1_coord = _helpers.get_y_from_quantum_register(control_qubit)
     y2_coord = _helpers.get_y_from_quantum_register(target_qubit)
