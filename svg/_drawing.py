@@ -139,10 +139,16 @@ def _draw_cnot_cross(drawing: Drawing,
 
 def _draw_control_circle(drawing: Drawing,
                          x_coord: float,
-                         y_coord: float) -> None:
+                         y_coord: float,
+                         desired_value: bool) -> None:
+    if desired_value:
+        filling_color = _constants.CONTROL_TRUE_GATE_FILL_COLOR
+    else:
+        filling_color = _constants.CONTROL_FALSE_GATE_FILL_COLOR
+
     drawing.add(drawing.circle(center=(x_coord, y_coord),
                                r=_constants.CONTROL_GATE_SIZE/2,
-                               fill=_constants.CONTROL_GATE_FILL_COLOR,
+                               fill=filling_color,
                                stroke=_constants.GATE_BORDER_COLOR,
                                stroke_width=_constants.STROKE_THICKNESS))
 
@@ -236,6 +242,62 @@ def _draw_unitary_gate(drawing: Drawing,                          #pylint: disab
                              text_anchor="middle",
                              font_size=font_size))
 
+def _draw_classically_conditioned_part(drawing: Drawing,
+                                       bit_gate_rank: BitRankType,
+                                       operation):
+    """Draw the line and the controls for classically controlled operations.
+
+    Arguments:
+        drawing (Drawing): an instance of svgwrite.Drawing, used to write the SVG.
+        bit_gate_rank (dict): see module documentation for more information on this
+                              data structure.
+        operation (dict): A QISKit operation. The dict has a key 'conditional'
+                          associated to an other Python dict with entries:
+            'type': the type of the operation. For example 'equals'.
+            'mask': the classical bits used (?)
+            'val' : the value compared with 'type' comparator to the classical bit.
+
+    Raises:
+        NotImplementedError: if the given operation affects more than 1 qubit.
+
+    """
+
+    qubits = operation['qubits']
+    if len(qubits) > 1:
+        raise NotImplementedError("Classically controlled multi-qubit operations are not " +
+                                  "implemented for the moment.")
+    total_qubits_number = len(bit_gate_rank['qubits'])
+    total_clbits_number = len(bit_gate_rank['clbits'])
+
+    # We take the binary little-endian representation of the value that should be
+    # compared with the value stored in classical registers.
+    # int(x, 0) let the 'int' function choose automatically the good basis.
+    value = int(operation['conditional']['val'], 0)
+    mask = int(operation['conditional']['mask'], 0)
+    # The [2:] is to remove the "Ob" part returned by the "bin" function.
+    # The [::-1] is to reverse the list order, to have a little-endian representation.
+    little_endian_bit_value = bin(value)[2:][::-1]
+    number_of_clbits = len(bin(mask)[2:])
+
+    assert number_of_clbits <= total_clbits_number
+
+    # First compute the important coordinates.
+    index_to_draw, _ = _helpers.get_max_index(bit_gate_rank,
+                                              operation.get('qubits', None),
+                                              operation.get('clbits', None))
+    x_coord = _helpers.get_x_from_index(index_to_draw)
+    yq_coord = _helpers.get_y_from_quantum_register(qubits[0])
+    yc_coord = _helpers.get_y_from_classical_register(total_clbits_number-1, total_qubits_number)
+    # Then draw the double line representing the classical control.
+    _draw_classical_double_line(drawing, x_coord, yq_coord, x_coord, yc_coord)
+
+    # Finally draw all the controlled circles
+    for classical_register_index in range(number_of_clbits):
+        y_coord = _helpers.get_y_from_classical_register(classical_register_index,
+                                                         total_qubits_number)
+        clbit_should_be_1 = (classical_register_index < len(little_endian_bit_value)
+                             and little_endian_bit_value[classical_register_index] == '1')
+        _draw_control_circle(drawing, x_coord, y_coord, clbit_should_be_1)
 
 def _update_data_structure(bit_gate_rank: BitRankType,
                            operation) -> None:
@@ -273,6 +335,9 @@ def _draw_gate(drawing: Drawing,
     name = operation['name']
     qubits = operation['qubits']
 
+    if 'conditional' in operation:
+        _draw_classically_conditioned_part(drawing, bit_gate_rank, operation)
+
     # Tags needed later
     drawing_controlled_gate = False
     index_to_draw = None
@@ -305,7 +370,8 @@ def _draw_gate(drawing: Drawing,
                                   index_to_draw)
         _draw_control_circle(drawing,
                              _helpers.get_x_from_index(index_to_draw),
-                             _helpers.get_y_from_quantum_register(control_qubit))
+                             _helpers.get_y_from_quantum_register(control_qubit),
+                             True)
         # Then if it's a CX gate, draw the nice CX gate.
         if name.lower() == "cx":
             _draw_cnot_cross(drawing,
