@@ -35,7 +35,7 @@ The functions here are used in many places in the code of qasm2svg
 and needed to be in a separate module.
 """
 
-from typing import Tuple, Sequence
+from typing import Tuple, Sequence, Union
 from . import _constants #pylint: disable=relative-beyond-top-level
 
 def get_x_from_index(index: int) -> int:
@@ -66,7 +66,8 @@ def get_x_from_index(index: int) -> int:
              not returned value
 
     """
-    x_coord = _constants.GATE_LEFT_BORDER
+    x_coord = _constants.REGISTER_NAME_WIDTH
+    x_coord += _constants.GATE_LEFT_BORDER
     x_coord += index * (_constants.GATE_SIZE + _constants.GATE_HORIZONTAL_SPACING)
     x_coord += _constants.GATE_SIZE / 2
     return x_coord
@@ -134,7 +135,8 @@ def get_dimensions(json_circuit, show_clbits: bool) -> Tuple[int, int]:
     if show_clbits:
         register_number += json_circuit['header'].get('number_of_clbits', 0)
 
-    width = _constants.GATE_LEFT_BORDER
+    width = _constants.REGISTER_NAME_WIDTH
+    width += _constants.GATE_LEFT_BORDER
     width += circuit_gates_number * (_constants.GATE_SIZE + _constants.GATE_HORIZONTAL_SPACING)
     width -= _constants.GATE_HORIZONTAL_SPACING
     width += _constants.GATE_RIGHT_BORDER
@@ -271,3 +273,33 @@ def get_max_index(bit_gate_rank,
 
     return tuple((max(max_index_c, max_index_q),
                   tuple((minq, maxq, minc, maxc))))
+
+def _get_text_dimensions(text:str, fontsize:int):
+    try:
+        import cairo
+    except ImportError:
+        return len(str) * fontsize
+
+    surface = cairo.SVGSurface('undefined.svg', 1280, 200)
+    cairo_context = cairo.Context(surface)
+    cairo_context.select_font_face('Arial', cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_BOLD)
+    cairo_context.set_font_size(fontsize)
+    xbearing, ybearing, width, height, xadvance, yadvance = cairo_context.text_extents(text)
+    return width, height
+
+
+def _adapt_text_font_size(text:str,
+                          desired_width:Union[int,float],
+                          desired_height:Union[int,float]) -> int:
+    # Take an arbitrary initial font size, big enought to lower the errors of the
+    # computations below
+    initial_font_size = 100
+    # Draw the text. To draw the text with the best font size (not too small nor too big)
+    # we compute its width with a known font size and adapt the real font size.
+    text_width, text_height = _get_text_dimensions(text, initial_font_size)
+    # We want to fit the full gate name to the gate box, so we compute the scaling factor
+    # needed to fit the gate name.
+    font_scale = max(text_width/desired_width, text_height/desired_height)
+    # Finally we do the assumption that applying a scaling factor to the font size is the
+    # same as applying this scaling factor to the rendered text.
+    return int(initial_font_size / font_scale)

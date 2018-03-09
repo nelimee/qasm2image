@@ -57,7 +57,7 @@ described below:
 Requires:
     - svgwrite module
 """
-
+import itertools
 from typing import Sequence, Dict
 from svgwrite import Drawing
 from . import _helpers
@@ -231,17 +231,13 @@ def _draw_unitary_gate(drawing: Drawing,                          #pylint: disab
     else:
         _draw_gate_rect(drawing, x_coord, y_coord)
 
-    # Adapt the font size to the thing we want to write before drawing
-    # The power 0.8 is empirical. A power function was choosen because:
-    # 1. The size for 1-letter names was good (i.e. a constant factor would have
-    #    changed this size, which is not what we want).
-    # 2. The size for more than 1 letter names was too small (i.e. we want to
-    #    divide the size by something smaller than the number of characters).
-    font_size //= len(gate_name)**0.8
+    desired_width  = _constants.GATE_SIZE - 2*_constants.GATE_INSIDE_MARGIN
+    desired_height = _constants.GATE_SIZE - 2*_constants.GATE_INSIDE_MARGIN
+    font_size = _helpers._adapt_text_font_size(gate_name, desired_width, desired_height)
+
     drawing.add(drawing.text(gate_name,
-                             # font_size/3 is an experimental value that seems to work for
-                             # centering vertically the text.
-                             insert=(x_coord, y_coord + font_size/3),
+                             insert=(x_coord, y_coord +
+                                     _constants.FONT_SIZE_CENTER_VERTICALLY_MULTIPLIER * font_size),
                              text_anchor="middle",
                              font_size=font_size))
 
@@ -423,17 +419,48 @@ def _draw_gate(drawing: Drawing,
     _update_data_structure(bit_gate_rank, operation)
 
 
-def _draw_registers_lines(drawing: Drawing,
-                          circuit_width: int,
-                          json_circuit: str,
-                          show_clbits: bool) -> None:
-    # Initialise the y coordinate of the first register line
+def _draw_registers_names_and_lines(drawing: Drawing,
+                                    circuit_width: int,
+                                    json_circuit: str,
+                                    show_clbits: bool) -> None:
+
+    # First we draw the names of each register
+    ## 1. Compute the font size that will be used to keep good dimensions
+    font_size = _constants.REGISTER_NAME_FONT_SIZE
+    for qubit_label in json_circuit['header'].get('qubit_labels', []):
+        qubit_text_name = "{}[{}]".format(*qubit_label)
+        desired_width = (_constants.REGISTER_NAME_WIDTH
+                         - _constants.REGISTER_NAME_LEFT_BORDER
+                         - _constants.REGISTER_NAME_RIGHT_BORDER)
+        adapted_font_size = _helpers._adapt_text_font_size(qubit_text_name,
+                                                           desired_width,
+                                                           _constants.MAX_REGISTER_NAME_HEIGHT)
+        font_size = min(font_size, adapted_font_size)
+    ## 2. Draw the bit names
+    y_coord = _constants.VERTICAL_BORDER
+    qubit_labels = json_circuit['header'].get('qubit_labels', [])
+    clbit_labels = json_circuit['header'].get('clbit_labels', []) if show_clbits else []
+    for bit_label in itertools.chain(qubit_labels, clbit_labels):
+        qubit_text_name = "{}[{}]".format(*bit_label)
+        drawing.add(
+            drawing.text(
+                qubit_text_name,
+                insert=(_constants.REGISTER_NAME_WIDTH - _constants.REGISTER_NAME_RIGHT_BORDER,
+                        y_coord + _constants.FONT_SIZE_CENTER_VERTICALLY_MULTIPLIER * font_size),
+                text_anchor="end",
+                font_size=font_size
+            )
+        )
+        y_coord += _constants.REGISTER_LINES_VERTICAL_SPACING
+
+
+    # Then we draw the register lines
     y_coord = _constants.VERTICAL_BORDER
 
     # Start with quantum registers
     quantum_register_number = json_circuit['header'].get('number_of_qubits', 0)
     for _ in range(quantum_register_number):
-        drawing.add(drawing.line(start=(0, y_coord),
+        drawing.add(drawing.line(start=(_constants.REGISTER_NAME_WIDTH, y_coord),
                                  end=(circuit_width, y_coord),
                                  stroke=_constants.GATE_BORDER_COLOR,
                                  stroke_width=_constants.STROKE_THICKNESS))
@@ -443,14 +470,16 @@ def _draw_registers_lines(drawing: Drawing,
     if show_clbits:
         classical_register_number = json_circuit['header'].get('number_of_clbits', 0)
         for _ in range(classical_register_number):
-            _draw_classical_double_line(drawing, 0, y_coord, circuit_width, y_coord)
+            _draw_classical_double_line(drawing, _constants.REGISTER_NAME_WIDTH,
+                                        y_coord, circuit_width, y_coord)
             y_coord += _constants.REGISTER_LINES_VERTICAL_SPACING
 
 
 def _draw_json_circuit(json_circuit,
                        unit: str = 'px',
                        round_index: int = 0,
-                       show_clbits: bool = True) -> str:
+                       show_clbits: bool = True,
+                       bit_order: dict = None) -> str:
     """Draw a circuit represented as a JSON string.
 
     Args:
@@ -464,6 +493,7 @@ def _draw_json_circuit(json_circuit,
                              this parameter need to be tested.
         show_clbits  (bool): True if the function should draw the classical bits, False
                              otherwise.
+        bit_order    (dict): A Python dictionnary storing the bit ordering.
     Returns:
         str: SVG string representing the given circuit.
     """
@@ -478,8 +508,8 @@ def _draw_json_circuit(json_circuit,
                               'qubits': [0] * json_circuit['header'].get('number_of_qubits', 0)}
 
     # And draw!
-    # First the registers lines
-    _draw_registers_lines(drawing, width, json_circuit, show_clbits)
+    # First the registers names and lines
+    _draw_registers_names_and_lines(drawing, width, json_circuit, show_clbits)
     # And then each gate
     for operation in json_circuit['operations']:
         _draw_gate(drawing, index_last_gate_on_reg, operation, show_clbits)
