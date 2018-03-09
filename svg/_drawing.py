@@ -425,9 +425,11 @@ def _draw_registers_names_and_lines(drawing: Drawing,
                                     show_clbits: bool) -> None:
 
     # First we draw the names of each register
+    qubit_labels = json_circuit['header'].get('qubit_labels', [])
+    clbit_labels = json_circuit['header'].get('clbit_labels', []) if show_clbits else []
     ## 1. Compute the font size that will be used to keep good dimensions
     font_size = _constants.REGISTER_NAME_FONT_SIZE
-    for qubit_label in json_circuit['header'].get('qubit_labels', []):
+    for qubit_label in itertools.chain(qubit_labels, clbit_labels):
         qubit_text_name = "{}[{}]".format(*qubit_label)
         desired_width = (_constants.REGISTER_NAME_WIDTH
                          - _constants.REGISTER_NAME_LEFT_BORDER
@@ -438,8 +440,6 @@ def _draw_registers_names_and_lines(drawing: Drawing,
         font_size = min(font_size, adapted_font_size)
     ## 2. Draw the bit names
     y_coord = _constants.VERTICAL_BORDER
-    qubit_labels = json_circuit['header'].get('qubit_labels', [])
-    clbit_labels = json_circuit['header'].get('clbit_labels', []) if show_clbits else []
     for bit_label in itertools.chain(qubit_labels, clbit_labels):
         qubit_text_name = "{}[{}]".format(*bit_label)
         drawing.add(
