@@ -43,6 +43,10 @@ except ImportError:
     print("colorama was not found on your Python installation. Colored output will not " +
           "work. You can install colorama with pip: 'pip install colorama'.")
 
+import sys
+import os
+# Add '..' in the Python path and import qasm2png
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from qasm2png import qasm2png
 
 
