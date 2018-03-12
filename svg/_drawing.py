@@ -66,26 +66,27 @@ from . import _constants
 BitRankType = Dict[str, Sequence[int]] #pylint: disable=invalid-name
 
 def _draw_classical_double_line(drawing: Drawing,
-                                x1, y1, x2, y2) -> None:
-    """Draw a double line between (x1,y1) and (x2,y2).
+                                x1_coord, y1_coord,
+                                x2_coord, y2_coord) -> None:
+    """Draw a double line between (x1_coord,y1_coord) and (x2_coord,y2_coord).
 
     Raises:
-        NotImplementedError: when x1!=x2 and y1!=y2 (i.e. when the
+        NotImplementedError: when x1_coord!=x2_coord and y1_coord!=y2_coord (i.e. when the
                          line is neither horizontal nor vertical).
     """
     x_increment, y_increment = 0, 0
-    if x1 == x2:
+    if x1_coord == x2_coord:
         x_increment = _constants.DOUBLE_LINES_SEPARATION
-    elif y1 == y2:
+    elif y1_coord == y2_coord:
         y_increment = _constants.DOUBLE_LINES_SEPARATION
     else:
         raise NotImplementedError("The drawed line should be either horizontal or vertical.")
-    drawing.add(drawing.line(start=(x1 - x_increment, y1 - y_increment),
-                             end=(x2 - x_increment, y2 - y_increment),
+    drawing.add(drawing.line(start=(x1_coord - x_increment, y1_coord - y_increment),
+                             end=(x2_coord - x_increment, y2_coord - y_increment),
                              stroke=_constants.GATE_BORDER_COLOR,
                              stroke_width=_constants.STROKE_THICKNESS))
-    drawing.add(drawing.line(start=(x1 + x_increment, y1 + y_increment),
-                             end=(x2 + x_increment, y2 + y_increment),
+    drawing.add(drawing.line(start=(x1_coord + x_increment, y1_coord + y_increment),
+                             end=(x2_coord + x_increment, y2_coord + y_increment),
                              stroke=_constants.GATE_BORDER_COLOR,
                              stroke_width=_constants.STROKE_THICKNESS))
 
@@ -231,9 +232,9 @@ def _draw_unitary_gate(drawing: Drawing,                          #pylint: disab
     else:
         _draw_gate_rect(drawing, x_coord, y_coord)
 
-    desired_width  = _constants.GATE_SIZE - 2*_constants.GATE_INSIDE_MARGIN
+    desired_width = _constants.GATE_SIZE - 2*_constants.GATE_INSIDE_MARGIN
     desired_height = _constants.GATE_SIZE - 2*_constants.GATE_INSIDE_MARGIN
-    font_size = _helpers._adapt_text_font_size(gate_name, desired_width, desired_height)
+    font_size = _helpers.adapt_text_font_size(gate_name, desired_width, desired_height)
 
     drawing.add(drawing.text(gate_name,
                              insert=(x_coord, y_coord +
@@ -434,9 +435,9 @@ def _draw_registers_names_and_lines(drawing: Drawing,
         desired_width = (_constants.REGISTER_NAME_WIDTH
                          - _constants.REGISTER_NAME_LEFT_BORDER
                          - _constants.REGISTER_NAME_RIGHT_BORDER)
-        adapted_font_size = _helpers._adapt_text_font_size(qubit_text_name,
-                                                           desired_width,
-                                                           _constants.MAX_REGISTER_NAME_HEIGHT)
+        adapted_font_size = _helpers.adapt_text_font_size(qubit_text_name,
+                                                          desired_width,
+                                                          _constants.MAX_REGISTER_NAME_HEIGHT)
         font_size = min(font_size, adapted_font_size)
     ## 2. Draw the bit names
     y_coord = _constants.VERTICAL_BORDER

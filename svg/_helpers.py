@@ -288,9 +288,9 @@ def _get_text_dimensions(text:str, fontsize:int):
     return width, height
 
 
-def _adapt_text_font_size(text:str,
-                          desired_width:Union[int,float],
-                          desired_height:Union[int,float]) -> int:
+def adapt_text_font_size(text:str,
+                         desired_width:Union[int,float],
+                         desired_height:Union[int,float]) -> int:
     # Take an arbitrary initial font size, big enought to lower the errors of the
     # computations below
     initial_font_size = 100
