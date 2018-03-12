@@ -187,3 +187,9 @@ tags
 
 
 # End of https://www.gitignore.io/api/vim,emacs,python,visualstudiocode
+
+tests/examples/generic/*.png
+tests/examples/generic/*.svg
+
+tests/examples/ibmqx2/*.png
+tests/examples/ibmqx2/*.svg
