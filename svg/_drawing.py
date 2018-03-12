@@ -334,9 +334,13 @@ def _draw_gate(drawing: Drawing,
 
     name = operation['name']
     qubits = operation['qubits']
+    name_conditional_part = ""
 
     if 'conditional' in operation:
-        _draw_classically_conditioned_part(drawing, bit_gate_rank, operation)
+        if show_clbits:
+            _draw_classically_conditioned_part(drawing, bit_gate_rank, operation)
+        else:
+            name_conditional_part = "[c={}]".format(int(operation['conditional']['val'], 0))
 
     # Tags needed later
     drawing_controlled_gate = False
@@ -352,7 +356,7 @@ def _draw_gate(drawing: Drawing,
 
     # If it is a reset gate, then draw a unitary gate with 'reset' name.
     if name == 'reset':
-        _draw_unitary_gate(drawing, bit_gate_rank, qubits[0], name)
+        _draw_unitary_gate(drawing, bit_gate_rank, qubits[0], name + name_conditional_part)
 
     # If the gate is a controlled one then draw the controlled part and let the
     # code just after draw the main gate.
@@ -396,8 +400,8 @@ def _draw_gate(drawing: Drawing,
         _draw_unitary_gate(drawing,
                            bit_gate_rank,
                            qubits[0],
-                           name+"({})".format(",".join(map(_round_numeric_param,
-                                                           operation['params']))),
+                           name+name_conditional_part+"({})".format(
+                               ",".join(map(_round_numeric_param, operation['params']))),
                            is_controlled_gate=drawing_controlled_gate,
                            index_to_draw=index_to_draw)
 
@@ -406,7 +410,7 @@ def _draw_gate(drawing: Drawing,
         _draw_unitary_gate(drawing,
                            bit_gate_rank,
                            qubits[0],
-                           name.upper(),
+                           name.upper()+name_conditional_part,
                            is_controlled_gate=drawing_controlled_gate,
                            index_to_draw=index_to_draw)
 
