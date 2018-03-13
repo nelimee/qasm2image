@@ -95,33 +95,37 @@ def _draw_line_between_qubits(drawing: Drawing,
                               bit_gate_rank: BitRankType,
                               control_qubit: int,
                               target_qubit: int,
+                              bit_mapping: dict,
                               index_to_draw: int = None) -> None:
     if index_to_draw is None:
         index_to_draw, _ = _helpers.get_max_index(bit_gate_rank,
                                                   qubits=[control_qubit, target_qubit])
     x_coord = _helpers.get_x_from_index(index_to_draw)
-    y1_coord = _helpers.get_y_from_quantum_register(control_qubit)
-    y2_coord = _helpers.get_y_from_quantum_register(target_qubit)
+    y1_coord = _helpers.get_y_from_quantum_register(control_qubit, bit_mapping)
+    y2_coord = _helpers.get_y_from_quantum_register(target_qubit, bit_mapping)
     drawing.add(drawing.line(start=(x_coord, y1_coord),
                              end=(x_coord, y2_coord),
                              stroke=_constants.GATE_BORDER_COLOR,
                              stroke_width=_constants.STROKE_THICKNESS))
 
-def _draw_qubit_clbit_line(drawing: Drawing,
-                           bit_gate_rank: BitRankType,
-                           qubit: int,
-                           clbit: int,
-                           index_to_draw: int = None) -> None:
+# def _draw_qubit_clbit_line(drawing: Drawing,
+#                            bit_gate_rank: BitRankType,
+#                            qubit: int,
+#                            clbit: int,
+#                            bit_mapping: dict,
+#                            index_to_draw: int = None) -> None:
 
-    if index_to_draw is None:
-        index_to_draw, _ = _helpers.get_max_index(bit_gate_rank,
-                                                  qubits=[qubit],
-                                                  clbits=[clbit])
-    x_coord = _helpers.get_x_from_index(index_to_draw)
-    y1_coord = _helpers.get_y_from_quantum_register(qubit)
-    y2_coord = _helpers.get_y_from_classical_register(clbit, len(bit_gate_rank['qubits']))
+#     if index_to_draw is None:
+#         index_to_draw, _ = _helpers.get_max_index(bit_gate_rank,
+#                                                   qubits=[qubit],
+#                                                   clbits=[clbit])
+#     x_coord = _helpers.get_x_from_index(index_to_draw)
+#     y1_coord = _helpers.get_y_from_quantum_register(qubit, bit_mapping)
+#     y2_coord = _helpers.get_y_from_classical_register(clbit,
+#                                                       len(bit_gate_rank['qubits']),
+#                                                       bit_mapping)
 
-    _draw_classical_double_line(drawing, x_coord, y1_coord, x_coord, y2_coord)
+#     _draw_classical_double_line(drawing, x_coord, y1_coord, x_coord, y2_coord)
 
 def _draw_cnot_cross(drawing: Drawing,
                      x_coord: float,
@@ -183,16 +187,18 @@ def _draw_measure_gate(drawing: Drawing,
                        bit_gate_rank: BitRankType,
                        measured_qubit: int,
                        target_clbit: int,
-                       show_clbits: bool) -> None:
+                       show_clbits: bool,
+                       bit_mapping: dict) -> None:
     index_to_draw, _ = _helpers.get_max_index(bit_gate_rank,
                                               qubits=[measured_qubit],
                                               clbits=[target_clbit])
 
     x_coord = _helpers.get_x_from_index(index_to_draw)
-    yq_coord = _helpers.get_y_from_quantum_register(measured_qubit)
+    yq_coord = _helpers.get_y_from_quantum_register(measured_qubit, bit_mapping)
     if show_clbits:
         yc_coord = _helpers.get_y_from_classical_register(target_clbit,
-                                                          len(bit_gate_rank['qubits']))
+                                                          len(bit_gate_rank['qubits']),
+                                                          bit_mapping)
         # Draw the line between the 2 bits
         _draw_classical_double_line(drawing, x_coord, yq_coord, x_coord, yc_coord)
 
@@ -205,12 +211,14 @@ def _draw_measure_gate(drawing: Drawing,
                                  stroke=_constants.GATE_BORDER_COLOR,
                                  stroke_width=_constants.STROKE_THICKNESS))
         # Draw the "measure" gate.
-        _draw_unitary_gate(drawing, bit_gate_rank, measured_qubit, "M", index_to_draw=index_to_draw)
+        _draw_unitary_gate(drawing, bit_gate_rank, measured_qubit, "M",
+                           bit_mapping, index_to_draw=index_to_draw)
 
     else:
         # Draw the "measure" gate.
         _draw_unitary_gate(drawing, bit_gate_rank, measured_qubit, "M" + str(target_clbit),
-                           index_to_draw=index_to_draw, font_size=_constants.GATE_FONT_SIZE/2)
+                           bit_mapping, index_to_draw=index_to_draw,
+                           font_size=_constants.GATE_FONT_SIZE/2)
 
 
 
@@ -218,13 +226,14 @@ def _draw_unitary_gate(drawing: Drawing,                          #pylint: disab
                        bit_gate_rank: BitRankType,
                        qubit: int,
                        gate_name: str,
+                       bit_mapping: dict,
                        font_size: int = _constants.GATE_FONT_SIZE,
                        index_to_draw: int = None,
                        is_controlled_gate: bool = False) -> None:
     if index_to_draw is None:
         index_to_draw = bit_gate_rank['qubits'][qubit]
     x_coord = _helpers.get_x_from_index(index_to_draw)
-    y_coord = _helpers.get_y_from_quantum_register(qubit)
+    y_coord = _helpers.get_y_from_quantum_register(qubit, bit_mapping)
 
     # Draw the good gate shape
     if is_controlled_gate:
@@ -244,7 +253,8 @@ def _draw_unitary_gate(drawing: Drawing,                          #pylint: disab
 
 def _draw_classically_conditioned_part(drawing: Drawing,
                                        bit_gate_rank: BitRankType,
-                                       operation):
+                                       operation,
+                                       bit_mapping: dict):
     """Draw the line and the controls for classically controlled operations.
 
     Arguments:
@@ -286,15 +296,17 @@ def _draw_classically_conditioned_part(drawing: Drawing,
                                               operation.get('qubits', None),
                                               operation.get('clbits', None))
     x_coord = _helpers.get_x_from_index(index_to_draw)
-    yq_coord = _helpers.get_y_from_quantum_register(qubits[0])
-    yc_coord = _helpers.get_y_from_classical_register(total_clbits_number-1, total_qubits_number)
+    yq_coord = _helpers.get_y_from_quantum_register(qubits[0], bit_mapping)
+    yc_coord = _helpers.get_y_from_classical_register(total_clbits_number-1, total_qubits_number,
+                                                      bit_mapping)
     # Then draw the double line representing the classical control.
     _draw_classical_double_line(drawing, x_coord, yq_coord, x_coord, yc_coord)
 
     # Finally draw all the controlled circles
     for classical_register_index in range(number_of_clbits):
         y_coord = _helpers.get_y_from_classical_register(classical_register_index,
-                                                         total_qubits_number)
+                                                         total_qubits_number,
+                                                         bit_mapping)
         clbit_should_be_1 = (classical_register_index < len(little_endian_bit_value)
                              and little_endian_bit_value[classical_register_index] == '1')
         _draw_control_circle(drawing, x_coord, y_coord, clbit_should_be_1)
@@ -322,7 +334,8 @@ def _update_data_structure(bit_gate_rank: BitRankType,
 def _draw_gate(drawing: Drawing,
                bit_gate_rank: BitRankType,
                operation,
-               show_clbits: bool) -> None:
+               show_clbits: bool,
+               bit_mapping: dict) -> None:
 
     unitary_gate_names = 'xyzh'
     supported_base_gates = set(unitary_gate_names)
@@ -338,7 +351,7 @@ def _draw_gate(drawing: Drawing,
 
     if 'conditional' in operation:
         if show_clbits:
-            _draw_classically_conditioned_part(drawing, bit_gate_rank, operation)
+            _draw_classically_conditioned_part(drawing, bit_gate_rank, operation, bit_mapping)
         else:
             name_conditional_part = "[c={}]".format(int(operation['conditional']['val'], 0))
 
@@ -348,7 +361,12 @@ def _draw_gate(drawing: Drawing,
 
     # If it is a measure gate then call the specialized function to draw it.
     if name == 'measure':
-        _draw_measure_gate(drawing, bit_gate_rank, qubits[0], operation['clbits'][0], show_clbits)
+        _draw_measure_gate(drawing,
+                           bit_gate_rank,
+                           qubits[0],
+                           operation['clbits'][0],
+                           show_clbits,
+                           bit_mapping)
 
     # If it is a barrier gate then we do not draw anything
     if name == 'barrier':
@@ -356,7 +374,7 @@ def _draw_gate(drawing: Drawing,
 
     # If it is a reset gate, then draw a unitary gate with 'reset' name.
     if name == 'reset':
-        _draw_unitary_gate(drawing, bit_gate_rank, qubits[0], name + name_conditional_part)
+        _draw_unitary_gate(drawing, bit_gate_rank, qubits[0], name + name_conditional_part, bit_mapping)
 
     # If the gate is a controlled one then draw the controlled part and let the
     # code just after draw the main gate.
@@ -371,16 +389,17 @@ def _draw_gate(drawing: Drawing,
                                   bit_gate_rank['qubits'],
                                   control_qubit,
                                   target_qubit,
+                                  bit_mapping,
                                   index_to_draw)
         _draw_control_circle(drawing,
                              _helpers.get_x_from_index(index_to_draw),
-                             _helpers.get_y_from_quantum_register(control_qubit),
+                             _helpers.get_y_from_quantum_register(control_qubit, bit_mapping),
                              True)
         # Then if it's a CX gate, draw the nice CX gate.
         if name.lower() == "cx":
             _draw_cnot_cross(drawing,
                              _helpers.get_x_from_index(index_to_draw),
-                             _helpers.get_y_from_quantum_register(target_qubit))
+                             _helpers.get_y_from_quantum_register(target_qubit, bit_mapping))
         # Else keep the information that we should draw a controlled gate.
         else:
             drawing_controlled_gate = True
@@ -402,6 +421,7 @@ def _draw_gate(drawing: Drawing,
                            qubits[0],
                            name+name_conditional_part+"({})".format(
                                ",".join(map(_round_numeric_param, operation['params']))),
+                           bit_mapping,
                            is_controlled_gate=drawing_controlled_gate,
                            index_to_draw=index_to_draw)
 
@@ -411,6 +431,7 @@ def _draw_gate(drawing: Drawing,
                            bit_gate_rank,
                            qubits[0],
                            name.upper()+name_conditional_part,
+                           bit_mapping,
                            is_controlled_gate=drawing_controlled_gate,
                            index_to_draw=index_to_draw)
 
@@ -502,12 +523,47 @@ def _draw_json_circuit(json_circuit,
     Returns:
         str: SVG string representing the given circuit.
     """
+
+    # TEMPORARY FIX FOR THE QOBJ STRUCTURE
+    # "issue": the json_circuit['header']['clbit_labels'] and
+    # json_circuit['header']['qubit_labels'] don't have the same meaning and it
+    # seems unintuitive. I fix that here. This part should be removed if the
+    # qobj structure change to fix this behaviour.
+    new_clbit_labels = list()
+    for clbit_label in json_circuit['header']['clbit_labels']:
+        for i in range(clbit_label[1]+1):
+            new_clbit_labels.append([clbit_label[0], i])
+    json_circuit['header']['clbit_labels'] = new_clbit_labels
+
+    # Take the appropriate default value for bit_order if not provided by the
+    # user.
+    if bit_order is None:
+        bit_order = dict()
+        for qubit_index, qubit_label in enumerate(json_circuit['header']['qubit_labels']):
+            bit_order["".join(map(str, qubit_label))] = qubit_index
+        for clbit_index, clbit_label in enumerate(json_circuit['header']['clbit_labels']):
+            bit_order["".join(map(str, clbit_label))] = clbit_index
+
+    # Transform the bit_order structure in a more useful one: the bit_order structure
+    # associates bit labels to their index, but in the json circuit we don't have bit
+    # labels but rather bit indices. So we want to have a dictionnary mapping indices
+    # in the json circuit to indices on the drawn circuit.
+    bit_mapping = {'clbits': dict(), 'qubits': dict()}
+    for qubit_index, qubit_label in enumerate(json_circuit['header']['qubit_labels']):
+        bit_mapping['qubits'][qubit_index] = bit_order["".join(map(str, qubit_label))]
+    for clbit_index, clbit_label in enumerate(json_circuit['header']['clbit_labels']):
+        bit_mapping['clbits'][clbit_index] = bit_order["".join(map(str, clbit_label))]
+
+    print(bit_mapping)
+
     # Compute the width and height
     width, height = _helpers.get_dimensions(json_circuit, show_clbits)
     width, height = round(width, round_index), round(height, round_index)
     width_str, height_str = str(width)+unit, str(height)+unit
+
     # Create the drawing
     drawing = Drawing(size=(width_str, height_str))
+
     # Create the internal structure used by the drawing functions
     index_last_gate_on_reg = {'clbits': [0] * json_circuit['header'].get('number_of_clbits', 0),
                               'qubits': [0] * json_circuit['header'].get('number_of_qubits', 0)}
@@ -517,5 +573,5 @@ def _draw_json_circuit(json_circuit,
     _draw_registers_names_and_lines(drawing, width, json_circuit, show_clbits)
     # And then each gate
     for operation in json_circuit['operations']:
-        _draw_gate(drawing, index_last_gate_on_reg, operation, show_clbits)
+        _draw_gate(drawing, index_last_gate_on_reg, operation, show_clbits, bit_mapping)
     return drawing.tostring()

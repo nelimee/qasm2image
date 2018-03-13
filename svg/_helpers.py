@@ -72,42 +72,58 @@ def get_x_from_index(index: int) -> int:
     x_coord += _constants.GATE_SIZE / 2
     return x_coord
 
-def get_y_from_quantum_register(quantum_register_index: int) -> int:
+def get_y_from_quantum_register(quantum_register_index_in_JSON: int,
+                                bit_mapping: dict) -> int:
     """Compute the y-coordinate associated to the given quantum register.
 
     This method assumes that all the quantum registers are drawn *before* the
     classical ones.
 
     Parameter:
-        quantum_register_index (int): Identifier of the quantum register.
-
+        quantum_register_index_in_JSON (int): identifier of the quantum
+               register from the JSON circuit representation.
+        bit_mapping (dict): the map that stores the correspondances between
+               bits indices in the JSON circuit and the desired output
+               indices.
+               Structure:
+                  {'qubits': {index_in_JSON : index_in_drawing},
+                   'clbits': {index_in_JSON : index_in_drawing}}
     Returns:
       int: The y-coordinate of the line representing the quantum register
            number quantum_register_index.
     """
     y_coord = _constants.VERTICAL_BORDER
-    y_coord += quantum_register_index * _constants.REGISTER_LINES_VERTICAL_SPACING
+    index_to_draw = bit_mapping['qubits'][quantum_register_index_in_JSON]
+    y_coord += index_to_draw * _constants.REGISTER_LINES_VERTICAL_SPACING
     return y_coord
 
-def get_y_from_classical_register(classical_register_index: int,
-                                  quantum_registers_number: int) -> int:
+def get_y_from_classical_register(classical_register_index_in_JSON: int,
+                                  quantum_registers_number: int,
+                                  bit_mapping: dict) -> int:
     """Compute the y-coordinate associated to the given classical register.
 
     This method assumes that all the quantum registers are drawn *before* the
     classical ones.
 
     Parameters:
-        classical_register_index (int): Identifier of the classical register.
+        classical_register_index_in_JSON (int): identifier of the classical
+                                from the JSON circuit representation.
         quantum_registers_number (int): Number of quantum registers in the
                                         circuit.
-
+        bit_mapping (dict): the map that stores the correspondances between
+               bits indices in the JSON circuit and the desired output
+               indices.
+               Structure:
+                  {'qubits': {index_in_JSON : index_in_drawing},
+                   'clbits': {index_in_JSON : index_in_drawing}}
     Returns:
       int: The y-coordinate of the line representing the classical register
            number classical_register_index.
     """
     y_coord = _constants.VERTICAL_BORDER
-    reg_id = quantum_registers_number + classical_register_index
-    y_coord += reg_id * _constants.REGISTER_LINES_VERTICAL_SPACING
+    cl_index_to_draw = bit_mapping['clbits'][classical_register_index_in_JSON]
+    index_to_draw = quantum_registers_number + cl_index_to_draw
+    y_coord += index_to_draw * _constants.REGISTER_LINES_VERTICAL_SPACING
     return y_coord
 
 def get_dimensions(json_circuit, show_clbits: bool) -> Tuple[int, int]:

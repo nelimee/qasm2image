@@ -59,10 +59,19 @@ argument_parser.add_argument('--hide-clbits', action='store_true',
 argument_parser.add_argument('-s', '--scale', default=1, type=float,
                              help='scale of the PNG image. SVG output is not affected by ' +
                              'this parameter')
+argument_parser.add_argument('-o', '--ordering', default='default',
+                             choices=['default', 'reverse']
+                             help='bit ordering on the drawing')
+
 arguments = argument_parser.parse_args() #pylint: disable=invalid-name
 
+# Read the QASM code.
 with open(arguments.input_file, 'r') as qasm_file:
     qasm_str = qasm_file.read() #pylint: disable=invalid-name
+
+# Prepare the ordering
+if arguments.ordering == 'default':
+    bit_order = {}
 
 if arguments.output_file.endswith('.svg'):
     with open(arguments.output_file, 'w') as svg_file:
