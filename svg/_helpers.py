@@ -34,7 +34,7 @@
 The functions here are used in many places in the code of qasm2svg
 and needed to be in a separate module.
 """
-
+import os
 from typing import Tuple, Sequence, Union
 from . import _constants #pylint: disable=relative-beyond-top-level
 
@@ -279,12 +279,15 @@ def _get_text_dimensions(text:str, fontsize:int):
         import cairo
     except ImportError:
         return len(str) * fontsize
-
-    surface = cairo.SVGSurface('undefined.svg', 1280, 200)
+    surface = cairo.SVGSurface('undefined65761354373731713.svg', 1280, 200)
     cairo_context = cairo.Context(surface)
     cairo_context.select_font_face('Arial', cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_BOLD)
     cairo_context.set_font_size(fontsize)
     xbearing, ybearing, width, height, xadvance, yadvance = cairo_context.text_extents(text)
+
+    # Don't forget to remove the undefined65761354373731713.svg file
+    os.remove("undefined65761354373731713.svg")
+
     return width, height
 
 

@@ -33,8 +33,6 @@
 
 """Transform all the QASM files in the qasm subfolder to PNG."""
 
-import os
-
 use_colors = True
 try:
     from colorama import Fore, Style
