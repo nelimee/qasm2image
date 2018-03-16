@@ -42,6 +42,7 @@ from typing import Sequence
 # Probably because the functions are generated when the module is imported.
 from cairosvg import svg2png #pylint: disable=no-name-in-module
 from . import qasm2svg
+from cairocffi import CairoError
 
 def qasm2png(qasm_str: str,
              basis: Sequence[str] = "u1,u2,u3,U,cx",
