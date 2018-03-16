@@ -6,18 +6,14 @@ The qasm2image repository provides functions to represent quantum circuits writt
 
 ### Dependencies
 
-All the dependencies are available via the PIP tool. See the installation instructions below.
+The tool and all the dependencies are available via the PIP tool. See the installation instructions below.
 
 ### Installation procedure
 
 ```shell
-# Cloning the git repository
-git clone https://github.com/nelimeee/qasm2image.git
-# Installing the dependencies locally
-pip3 install --user -r qasm2image/dependencies.txt
+pip3 install cffi
+pip3 install qasm2png
 ```
-
-You may also need to edit your Python path in order to be able to import the qasm2image module.
 
 ## Usage
 
@@ -25,8 +21,8 @@ You may also need to edit your Python path in order to be able to import the qas
 
 ```python
 # Import the functions
-from qasm2svg import qasm2svg
-from qasm2png import qasm2png
+from qasm2image import qasm2svg
+from qasm2image import qasm2png
 # Generate your QASM string (either read from a file or generate a circuit and ask for its QASM).
 qasm_str = "..."
 # Define the basis used to represent the circuit
@@ -48,10 +44,10 @@ with open('circuit.png', 'wb') as png_file:
 
 ### In a shell environnement
 
-A wrapper can be found in the `tools/` directory. This wrapper can be used as follow:
+A script is provided to change QASM code directly from the command line.
 
 ```shell
-$ ./qasm2image.py -h
+$ qasm2image -h
 usage: qasm2image.py [-h] [-b BASIS] [--hide-clbits] [-s SCALE]
                      input_file output_file
 
