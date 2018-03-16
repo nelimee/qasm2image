@@ -45,7 +45,7 @@ import sys
 import os
 # Add '..' in the Python path and import qasm2png
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from qasm2png import qasm2png
+from qasm2image import qasm2png
 
 
 def recursive_check_all_qasm_files(directory, exception_expected = False):
