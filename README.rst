@@ -18,7 +18,7 @@ Installation procedure
 .. code-block:: shell
 
    pip3 install cffi
-   pip3 install qasm2png
+   pip3 install qasm2image
 
 Usage
 -----
@@ -57,8 +57,8 @@ A script is provided to change QASM code directly from the command line.
 .. code-block:: shell
 
    $ qasm2image -h
-   usage: qasm2image.py [-h] [-b BASIS] [--hide-clbits] [-s SCALE]
-                        input_file output_file
+   usage: qasm2image [-h] [-b BASIS] [--hide-clbits] [-s SCALE]
+                     input_file output_file
 
    Transform a quantum circuit in QASM format to an image format.
 
