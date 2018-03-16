@@ -193,3 +193,7 @@ tests/examples/generic/*.svg
 
 tests/examples/ibmqx2/*.png
 tests/examples/ibmqx2/*.svg
+
+build/*
+dist/*
+qasm2image.egg-info/*
