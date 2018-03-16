@@ -554,8 +554,6 @@ def _draw_json_circuit(json_circuit,
     for clbit_index, clbit_label in enumerate(json_circuit['header']['clbit_labels']):
         bit_mapping['clbits'][clbit_index] = bit_order["".join(map(str, clbit_label))]
 
-    print(bit_mapping)
-
     # Compute the width and height
     width, height = _helpers.get_dimensions(json_circuit, show_clbits)
     width, height = round(width, round_index), round(height, round_index)

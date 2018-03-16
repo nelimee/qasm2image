@@ -29,67 +29,50 @@
 # knowledge of the CeCILL-B license and that you accept its terms.
 # ======================================================================
 
-"""This module provide the qasm2png function.
+"""This module contain the function qasm2svg.
+
+The function qasm2svg draw a quantum circuit as a SVG image string.
 
 Requires:
-    - cairosvg module
-    - qiskit module from qasm2svg module
+    - qiskit module
     - svgwrite module from svg.drawing module
 """
 
-from typing import Sequence
-# Pylint fails to parse the svg2png function in cairosvg.
-# Probably because the functions are generated when the module is imported.
-from cairosvg import svg2png #pylint: disable=no-name-in-module
-from qasm2svg import qasm2svg
-from cairocffi import CairoError
+from typing import Tuple
+import qiskit
 
-def qasm2png(qasm_str: str,
-             basis: Sequence[str] = "u1,u2,u3,U,cx",
-             show_clbits: bool = True,
-             scale: int = 1) -> bytes:
-    """Transform a QASM code to a PNG file.
+from .svg import _drawing
 
-    This method output the PNG representation of the quantum circuit
+QubitType = Tuple[qiskit.QuantumRegister, int] #pylint: disable=invalid-name
+
+def qasm2svg(qasm_str: str,
+             basis: str = "u1,u2,u3,U,cx",
+             show_clbits: bool = True) -> str:
+    """Transform a QASM code to an SVG file.
+
+    This method output the SVG representation of the quantum circuit
     provided as a QASM program.
 
     Remark: not all gates are implemented. If a gate is not implemented
             then a message will be printed to warn the user and the gate
-            will not be drawn in the PNG.
+            will not be drawn in the SVG.
             If you want to implement more gates see the _draw_gate method
             in ./svg/drawing.py.
 
     Args:
-        qasm_str    (str) : The QASM quantum circuit to draw in PNG.
-        basis       (list): The gate basis used to represent the circuit.
+        qasm_str    (str) : The QASM quantum circuit to draw in SVG.
+        basis       (list): The gate basis used to represent the circuit as a
+                            comma-separated string of names.
         show_clbits (bool): Flag that control the drawing of classical bit
                             lines.
-        scale       (int) : The scaling imposed to the produced PNG file.
-
     Returns:
-        bytes: The PNG representation of the given QASM circuit.
-
-    Raises:
-        CairoError: if cairo (the backend used to transform SVG to PNG)
-                    failed at one step. The error resulting of an
-                    invalid size (typically raised because the output
-                    PNG file is too large) is catched an will never be
-                    thrown by this function.
+        str: The SVG representation of the given QASM circuit.
     """
 
-    svg = qasm2svg(qasm_str, basis=basis, show_clbits=show_clbits)
-    succeed = False
-    while not succeed:
-        try:
-            png_bytes = svg2png(bytestring=svg.encode('utf-8'), scale=scale)
-        except CairoError as cairo_error:
-            # If the error is caused by a too huge size then reduce the scaling
-            if 'CAIRO_STATUS_INVALID_SIZE' in str(cairo_error):
-                scale /= 2
-            # Else, raise again the exception to warn the calling context
-            else:
-                raise cairo_error
-        else:
-            # If no exception occured, then we can exit our loop.
-            succeed = True
-    return png_bytes
+    # Then uncompile the QASM code to recover the gates to draw.
+    ast = qiskit.qasm.Qasm(data=qasm_str).parse()
+    unroller = qiskit.unroll.Unroller(ast, qiskit.unroll.JsonBackend(basis.split(',')))
+    unroller.execute()
+    json_circuit = unroller.backend.circuit
+
+    return _drawing._draw_json_circuit(json_circuit, show_clbits=show_clbits)

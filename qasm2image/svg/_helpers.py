@@ -292,9 +292,9 @@ def get_max_index(bit_gate_rank,
 
 def _get_text_dimensions(text:str, fontsize:int):
     try:
-        import cairo
+        import cairocffi as cairo
     except ImportError:
-        return len(str) * fontsize
+        return len(text) * fontsize, fontsize
     surface = cairo.SVGSurface('undefined65761354373731713.svg', 1280, 200)
     cairo_context = cairo.Context(surface)
     cairo_context.select_font_face('Arial', cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_BOLD)
