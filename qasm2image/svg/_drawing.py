@@ -311,26 +311,6 @@ def _draw_classically_conditioned_part(drawing: Drawing,
                              and little_endian_bit_value[classical_register_index] == '1')
         _draw_control_circle(drawing, x_coord, y_coord, clbit_should_be_1)
 
-def _update_data_structure(bit_gate_rank: BitRankType,
-                           operation) -> None:
-
-    # By default we increment the current index by 1
-    increment = 1
-    # But not when the operation is a 'barrier' operation
-    if operation['name'] == 'barrier':
-        increment = 0
-
-    # Update the structure
-    index_to_update, (minq, maxq, minc, maxc) = _helpers.get_max_index(bit_gate_rank,
-                                                                       operation.get('qubits',
-                                                                                     None),
-                                                                       operation.get('clbits',
-                                                                                     None))
-    for qubit in range(minq, maxq+1):
-        bit_gate_rank['qubits'][qubit] = index_to_update + increment
-    for clbit in range(minc, maxc+1):
-        bit_gate_rank['clbits'][clbit] = index_to_update + increment
-
 def _draw_gate(drawing: Drawing,
                bit_gate_rank: BitRankType,
                operation,
@@ -442,7 +422,7 @@ def _draw_gate(drawing: Drawing,
 
     # And finally take care of our data structure that keeps track of the position
     # where we want to draw.
-    _update_data_structure(bit_gate_rank, operation)
+    _helpers._update_data_structure(bit_gate_rank, operation)
 
 
 def _draw_registers_names_and_lines(drawing: Drawing,

@@ -35,8 +35,10 @@ The functions here are used in many places in the code of qasm2svg
 and needed to be in a separate module.
 """
 import os
-from typing import Tuple, Sequence, Union
+from typing import Tuple, Sequence, Union, Dict
 from . import _constants #pylint: disable=relative-beyond-top-level
+
+BitRankType = Dict[str, Sequence[int]] #pylint: disable=invalid-name
 
 def get_x_from_index(index: int) -> int:
     """Compute the x-coordinate with the provided x index.
@@ -322,3 +324,21 @@ def adapt_text_font_size(text:str,
     # Finally we do the assumption that applying a scaling factor to the font size is the
     # same as applying this scaling factor to the rendered text.
     return int(initial_font_size / font_scale)
+
+def _update_data_structure(bit_gate_rank: BitRankType,
+                           operation) -> None:
+
+    # By default we increment the current index by 1
+    increment = 1
+    # But not when the operation is a 'barrier' operation
+    if operation['name'] == 'barrier':
+        increment = 0
+
+    # Update the structure
+    index_to_update, (minq, maxq, minc, maxc) = get_max_index(bit_gate_rank,
+                                                              operation.get('qubits', None),
+                                                              operation.get('clbits', None))
+    for qubit in range(minq, maxq+1):
+        bit_gate_rank['qubits'][qubit] = index_to_update + increment
+    for clbit in range(minc, maxc+1):
+        bit_gate_rank['clbits'][clbit] = index_to_update + increment
