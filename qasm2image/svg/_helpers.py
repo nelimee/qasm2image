@@ -208,17 +208,7 @@ def _get_circuit_width(json_circuit) -> int:
                               'qubits' : [0] * max(qubits_number, 1)}
     # For each operation
     for operation in json_circuit['operations']:
-        # First we compute the x-index
-        current_index, (minq, maxq, minc, maxc) = get_max_index(index_last_gate_on_reg,
-                                                                qubits=operation.get('qubits',
-                                                                                     None),
-                                                                clbits=operation.get('clbits',
-                                                                                     None))
-        # Update the x-index for the bits used by the current operation
-        for qubit in range(minq, maxq+1):
-            index_last_gate_on_reg['qubits'][qubit] = current_index+1
-        for clbit in range(minc, maxc+1):
-            index_last_gate_on_reg['clbits'][clbit] = current_index+1
+        _update_data_structure(index_last_gate_on_reg, operation)
 
     return max(max(index_last_gate_on_reg['clbits']),
                max(index_last_gate_on_reg['qubits']))
