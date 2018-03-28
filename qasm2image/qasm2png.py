@@ -45,7 +45,8 @@ from . import qasm2svg
 from cairocffi import CairoError
 
 def qasm2png(qasm_str: str,
-             basis: Sequence[str] = "u1,u2,u3,U,cx",
+             basis: str = ('id,u0,u1,u2,u3,x,y,z,h,s,sdg,t,tdg,rx,ry,rz,'
+                           'cx,cy,cz,ch,crz,cu1,cu3,swap,ccx'),
              show_clbits: bool = True,
              scale: int = 1) -> bytes:
     """Transform a QASM code to a PNG file.

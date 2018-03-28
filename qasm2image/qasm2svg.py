@@ -46,8 +46,9 @@ from .svg import _drawing
 QubitType = Tuple[qiskit.QuantumRegister, int] #pylint: disable=invalid-name
 
 def qasm2svg(qasm_str: str,
-             basis: str = "u1,u2,u3,U,cx",
              show_clbits: bool = True) -> str:
+             basis: str = ('id,u0,u1,u2,u3,x,y,z,h,s,sdg,t,tdg,rx,ry,rz,'
+                           'cx,cy,cz,ch,crz,cu1,cu3,swap,ccx'),
     """Transform a QASM code to an SVG file.
 
     This method output the SVG representation of the quantum circuit
