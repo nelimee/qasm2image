@@ -58,7 +58,7 @@ Requires:
     - svgwrite module
 """
 import itertools
-from typing import Sequence, Dict
+from typing import Sequence, Dict, Tuple
 from svgwrite import Drawing
 from . import _helpers
 from . import _constants
@@ -505,7 +505,7 @@ def _draw_json_circuit(json_circuit,
                        unit: str = 'px',
                        round_index: int = 0,
                        show_clbits: bool = True,
-                       bit_order: dict = None) -> str:
+                       bit_order: dict = None) -> Tuple[str, Tuple[int, int]]:
     """Draw a circuit represented as a JSON string.
 
     Args:
@@ -521,7 +521,10 @@ def _draw_json_circuit(json_circuit,
                              otherwise.
         bit_order    (dict): A Python dictionnary storing the bit ordering.
     Returns:
-        str: SVG string representing the given circuit.
+        Tuple[str, Tuple[int, int]]: (SVG, (width, height))
+            - SVG: string representing the given circuit in SVG format.
+            - width: computed width in pixels.
+            - height: computed height in pixels.
     """
 
     # TEMPORARY FIX FOR THE QOBJ STRUCTURE
@@ -572,4 +575,4 @@ def _draw_json_circuit(json_circuit,
     # And then each gate
     for operation in json_circuit['operations']:
         _draw_gate(drawing, index_last_gate_on_reg, operation, show_clbits, bit_mapping)
-    return drawing.tostring()
+    return (drawing.tostring(), (width, height))
