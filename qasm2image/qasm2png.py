@@ -38,6 +38,7 @@ Requires:
 """
 
 from typing import Sequence
+from math import sqrt
 # Pylint fails to parse the svg2png function in cairosvg.
 # Probably because the functions are generated when the module is imported.
 from cairosvg import svg2png #pylint: disable=no-name-in-module
@@ -48,7 +49,7 @@ def qasm2png(qasm_str: str,
              basis: str = ('id,u0,u1,u2,u3,x,y,z,h,s,sdg,t,tdg,rx,ry,rz,'
                            'cx,cy,cz,ch,crz,cu1,cu3,swap,ccx'),
              show_clbits: bool = True,
-             scale: int = 1) -> bytes:
+             scale: float = 1.0) -> bytes:
     """Transform a QASM code to a PNG file.
 
     This method output the PNG representation of the quantum circuit
@@ -61,11 +62,11 @@ def qasm2png(qasm_str: str,
             in ./svg/drawing.py.
 
     Args:
-        qasm_str    (str) : The QASM quantum circuit to draw in PNG.
-        basis       (list): The gate basis used to represent the circuit.
-        show_clbits (bool): Flag that control the drawing of classical bit
-                            lines.
-        scale       (int) : The scaling imposed to the produced PNG file.
+        qasm_str    (str)  : The QASM quantum circuit to draw in PNG.
+        basis       (list) : The gate basis used to represent the circuit.
+        show_clbits (bool) : Flag that control the drawing of classical bit
+                             lines.
+        scale       (float): The scaling imposed to the produced PNG file.
 
     Returns:
         bytes: The PNG representation of the given QASM circuit.
@@ -78,7 +79,21 @@ def qasm2png(qasm_str: str,
                     thrown by this function.
     """
 
-    svg = qasm2svg.qasm2svg(qasm_str, basis=basis, show_clbits=show_clbits)
+    # We need to fix a maximum size for the PNG and adapt the scale variable
+    # *before* calling svg2png. If we call svg2png before adapting the scale,
+    # very large outputs will SEGFAULT because of cairo.
+    MAX_PNG_PX = 20000 * 20000
+
+    # Generate the SVG first.
+    svg, (width, height) = qasm2svg.qasm2svg(qasm_str, basis=basis,
+                                             show_clbits=show_clbits,
+                                             output_dimensions=True)
+    # Adapt scaling if needed
+    # Here scale is a square root because the scaling coefficient will be applied
+    # to width *and* to height, and not only to the pixel number.
+    scale = min(scale, sqrt(MAX_PNG_PX / (width*height)))
+
+    # And generate PNG
     succeed = False
     while not succeed:
         try:

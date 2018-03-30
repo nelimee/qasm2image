@@ -58,7 +58,7 @@ def main():
     argument_parser.add_argument('--hide-clbits', action='store_true',
                                  help='if present, classical bits will not be represented')
     argument_parser.add_argument('-s', '--scale', default=1, type=float,
-                                 help='scale of the PNG image. SVG output is not affected by ' +
+                                 help='scale of the image. SVG output is not affected by ' +
                                  'this parameter')
     # argument_parser.add_argument('-o', '--ordering', default='default',
     #                              choices=['default', 'reverse'],
