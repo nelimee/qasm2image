@@ -291,10 +291,9 @@ def _draw_classically_conditioned_part(drawing: Drawing,
 
     assert number_of_clbits <= total_clbits_number
 
-    # First compute the important coordinates.
+    # Compute the important coordinates.
     index_to_draw, _ = _helpers.get_max_index(bit_gate_rank,
-                                              operation.get('qubits', None),
-                                              operation.get('clbits', None))
+                                              operation=operation)
     x_coord = _helpers.get_x_from_index(index_to_draw)
     yq_coord = _helpers.get_y_from_quantum_register(qubits[0], bit_mapping)
     yc_coord = _helpers.get_y_from_classical_register(total_clbits_number-1, total_qubits_number,
@@ -335,9 +334,11 @@ def _draw_gate(drawing: Drawing,
         else:
             name_conditional_part = "[c={}]".format(int(operation['conditional']['val'], 0))
 
-    # Tags needed later
+    # Tag needed later
     drawing_controlled_gate = False
-    index_to_draw = None
+    # Compute the x coordinate of the gate.
+    index_to_draw, _ = _helpers.get_max_index(bit_gate_rank,
+                                              operation=operation)
 
     # If it is a measure gate then call the specialized function to draw it.
     if name == 'measure':
@@ -361,8 +362,6 @@ def _draw_gate(drawing: Drawing,
     if name.lower().startswith('c'):
         control_qubit = qubits[0]
         target_qubit = qubits[1]
-        index_to_draw, _ = _helpers.get_max_index(bit_gate_rank,
-                                                  qubits=[control_qubit, target_qubit])
 
         # Draw the line, then the little control circle
         _draw_line_between_qubits(drawing,
@@ -418,7 +417,6 @@ def _draw_gate(drawing: Drawing,
     # Warn the user we encountered a non-implemented gate.
     if name.lower() not in supported_gates:
         print("WARNING: Gate '{}' is not implemented".format(name))
-
 
     # And finally take care of our data structure that keeps track of the position
     # where we want to draw.

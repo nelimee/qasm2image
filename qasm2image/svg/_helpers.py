@@ -39,6 +39,7 @@ from typing import Tuple, Sequence, Union, Dict
 from . import _constants #pylint: disable=relative-beyond-top-level
 
 BitRankType = Dict[str, Sequence[int]] #pylint: disable=invalid-name
+QubitType = Tuple[str, int] #pylint: disable=invalid-name
 
 def get_x_from_index(index: int) -> int:
     """Compute the x-coordinate with the provided x index.
@@ -214,13 +215,22 @@ def _get_circuit_width(json_circuit) -> int:
                max(index_last_gate_on_reg['qubits']))
 
 def get_max_index(bit_gate_rank,
-                  qubits: Sequence[int] = None,
-                  clbits: Sequence[int] = None) -> Tuple[int, Tuple[int, int, int, int]]:
+                  operation = None,
+                  qubits = None,
+                  clbits = None) -> Tuple[int, Tuple[int, int, int, int]]:
     """Compute the maximum x index with an overlap.
 
     The maximum x index with an overlap is the maximum column index
-    where the representation of the operation on the given bits would
+    where the representation of the 'operation' (see below) would
     overlap with an already drawn gate representation.
+
+    The algorithm to determine the 'operation' is:
+    1) If the operation parameter is not None, then data is extracted
+       from it.
+    2) If the operation parameter is None and at least one of the qubits
+       and clbits parameters is set, then data is extracted from the
+       qubits and clbits parameters.
+    3) Else, an exception is raised.
 
     Parameters:
         bit_gate_rank (dict): Dictionnary representing the column index
@@ -236,9 +246,10 @@ def get_max_index(bit_gate_rank,
                                     ...,
                                     0 ]
                       }
-        qubits (list): Indexes of the qubits concerned by the operation.
-        clbits (list): Indexes of the classical bits concerned by the operation.
-
+        operation (dict): Dictionnary representing the current operation.
+           Structure: see qiskit data structures.
+        qubits (list): A list of quantum bits.
+        clbits (list): A list of classical bits.
     Returns:
         tuple: (max_index, (minq, maxq, minc, maxc)):
                  - max_index (int): the maximum x index with an overlap.
@@ -255,22 +266,35 @@ def get_max_index(bit_gate_rank,
                The ranges can be empty, i.e. it is possible that minq = 0 and
                maxq = -1 or minc = 0 and maxc = -1.
     Raises:
-        RuntimeError: when no qubits and no clbits are given to the function.
+        RuntimeError: when no operation, no qubits and no clbits are given to the function.
     """
 
-    if qubits is None and clbits is None:
-        raise RuntimeError("get_max_index cannot be called without any register.")
+    if operation is None and qubits is None and clbits is None:
+        raise RuntimeError("You should provide either an operation or a bit (quantum "
+                           "or classical) to get_max_index.")
+
     # By default, [minq,maxq] and [minc,maxc] are set to None.
     # Same for the index we are searching.
     minq, maxq, minc, maxc = None, None, None, None
     max_index_q, max_index_c = -1, -1
+
+    # Default values for qubits and clbits
+    if qubits is None:
+        qubits = []
+    if clbits is None:
+        clbits = []
+
+    # We compute the qubits and clbits involved in the operation
+    if operation is not None:
+        qubits, clbits = get_involved_bits(operation)
+
     # We update with the given sequences of qubits and clbits.
-    if qubits is not None:
+    if qubits:
         minq = min(qubits)
-        maxq = max(qubits) if clbits is None else len(bit_gate_rank['qubits'])-1
+        maxq = max(qubits) if not clbits else len(bit_gate_rank['qubits'])-1
         max_index_q = max([bit_gate_rank['qubits'][qubit] for qubit in range(minq, maxq+1)])
-    if clbits is not None:
-        minc = min(clbits) if qubits is None else 0
+    if clbits:
+        minc = min(clbits) if not qubits else 0
         maxc = max(clbits)
         max_index_c = max([bit_gate_rank['clbits'][clbit] for clbit in range(minc, maxc+1)])
 
@@ -324,11 +348,20 @@ def _update_data_structure(bit_gate_rank: BitRankType,
     if operation['name'] == 'barrier':
         increment = 0
 
-    # Update the structure
-    index_to_update, (minq, maxq, minc, maxc) = get_max_index(bit_gate_rank,
-                                                              operation.get('qubits', None),
-                                                              operation.get('clbits', None))
+    # Compute the values to update.
+    index_to_update, (minq, maxq, minc, maxc) = get_max_index(bit_gate_rank, operation=operation)
+    # And perform the update.
     for qubit in range(minq, maxq+1):
         bit_gate_rank['qubits'][qubit] = index_to_update + increment
     for clbit in range(minc, maxc+1):
         bit_gate_rank['clbits'][clbit] = index_to_update + increment
+
+def get_involved_bits(operation) -> Tuple[Sequence[QubitType], Sequence[QubitType]]:
+    qubits = operation.get('qubits', [])
+    clbits = operation.get('clbits', [])
+    if 'conditional' in operation:
+        mask = int(operation['conditional']['mask'], 0)
+        number_of_clbits = len(bin(mask)[2:])
+        clbits += list(range(number_of_clbits))
+
+    return (qubits, clbits)
