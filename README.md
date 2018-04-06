@@ -69,6 +69,18 @@ optional arguments:
 
 ```
 
+## License
+
+This project is distributed under the [CeCILL-B](http://www.cecill.info/licences/Licence_CeCILL-B_V1-en.html) license. A copy of the whole license is included
+in the repository.
+
+In order to use the work in this repository you have a strong obligation to cite (as stated in the license):
+
+ 1. The author of the work: Adrien Suau (see on my GitHub page or [mail me](mailto:adrien.suau@grenoble-inp.org) if any doubt).
+
+ 2. The CERFACS (Centre Européen de Recherche et de Formation Avancée en Calcul Scientifique).
+
+
 ## Output
 
 ### [adder.qasm](https://github.com/nelimeee/qasm2image/blob/master/tests/examples/generic/adder.qasm)
@@ -85,19 +97,8 @@ optional arguments:
 
 ### [qec.qasm](https://github.com/nelimeee/qasm2image/blob/master/tests/examples/generic/qec.qasm)
 ![qec.png](https://github.com/nelimeee/qasm2image/blob/master/images/qec_simple.png "qec.png")
+The same QASM code, but with the `hide-clbits` option set: `qasm2image --hide-clbits qec.{qasm,png}`.
 ![qec\_no\_clbits.png](https://github.com/nelimeee/qasm2image/blob/master/images/qec_no_clbits.png "qec\_no\_clbits.png")
 
 ### [teleportv2.qasm](https://github.com/nelimeee/qasm2image/blob/master/tests/examples/generic/teleportv2.qasm)
 ![teleportv2.png](https://github.com/nelimeee/qasm2image/blob/master/images/teleportv2_simple.png "teleportv2.png")
-
-
-## License
-
-This project is distributed under the [CeCILL-B](http://www.cecill.info/licences/Licence_CeCILL-B_V1-en.html) license. A copy of the whole license is included
-in the repository.
-
-In order to use the work in this repository you have a strong obligation to cite (as stated in the license):
-
- 1. The author of the work: Adrien Suau (see on my GitHub page or [mail me](mailto:adrien.suau@grenoble-inp.org) if any doubt).
-
- 2. The CERFACS (Centre Européen de Recherche et de Formation Avancée en Calcul Scientifique).

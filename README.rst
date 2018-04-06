@@ -76,6 +76,21 @@ A script is provided to change QASM code directly from the command line.
                            scale of the PNG image. SVG output is not affected by
                            this parameter
 
+License
+-------
+
+This project is distributed under the `CeCILL-B <http://www.cecill.info/licences/Licence_CeCILL-B_V1-en.html>`_ license. A copy of the whole license is included
+in the repository.
+
+In order to use the work in this repository you have a strong obligation to cite (as stated in the license):
+
+
+#. 
+   The author of the work: Adrien Suau (see on my GitHub page or `mail me <mailto:adrien.suau@grenoble-inp.org>`_ if any doubt).
+
+#. 
+   The CERFACS (Centre Européen de Recherche et de Formation Avancée en Calcul Scientifique).
+
 Output
 ------
 
@@ -123,6 +138,7 @@ Output
    :target: https://github.com/nelimeee/qasm2image/blob/master/images/qec_simple.png
    :alt: qec.png
 
+The same QASM code, but with the ``hide-clbits`` option set: ``qasm2image --hide-clbits qec.{qasm,png}``.
 
 .. image:: https://github.com/nelimeee/qasm2image/blob/master/images/qec_no_clbits.png
    :target: https://github.com/nelimeee/qasm2image/blob/master/images/qec_no_clbits.png
@@ -137,18 +153,3 @@ Output
    :target: https://github.com/nelimeee/qasm2image/blob/master/images/teleportv2_simple.png
    :alt: teleportv2.png
 
-
-License
--------
-
-This project is distributed under the `CeCILL-B <http://www.cecill.info/licences/Licence_CeCILL-B_V1-en.html>`_ license. A copy of the whole license is included
-in the repository.
-
-In order to use the work in this repository you have a strong obligation to cite (as stated in the license):
-
-
-#. 
-   The author of the work: Adrien Suau (see on my GitHub page or `mail me <mailto:adrien.suau@grenoble-inp.org>`_ if any doubt).
-
-#. 
-   The CERFACS (Centre Européen de Recherche et de Formation Avancée en Calcul Scientifique).
