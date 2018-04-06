@@ -296,7 +296,7 @@ def _draw_classically_conditioned_part(drawing: Drawing,
                                               operation=operation)
     x_coord = _helpers.get_x_from_index(index_to_draw)
     yq_coord = _helpers.get_y_from_quantum_register(qubits[0], bit_mapping)
-    yc_coord = _helpers.get_y_from_classical_register(total_clbits_number-1, total_qubits_number,
+    yc_coord = _helpers.get_y_from_classical_register(number_of_clbits-1, total_qubits_number,
                                                       bit_mapping)
     # Then draw the double line representing the classical control.
     _draw_classical_double_line(drawing, x_coord, yq_coord, x_coord, yc_coord)
