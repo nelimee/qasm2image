@@ -317,8 +317,8 @@ def _draw_gate(drawing: Drawing,
                show_clbits: bool,
                bit_mapping: dict) -> None:
 
-    unitary_gate_names = 'xyzh'
-    supported_base_gates = set(unitary_gate_names)
+    unitary_gate_names = 'xyzhst'
+    supported_base_gates = set(unitary_gate_names) | set(['sdg','tdg'])
     supported_u_gates = {"u{}".format(i) for i in [1, 2, 3]} | set(['u'])
     supported_unitary_gates = supported_base_gates | supported_u_gates
     supported_controled_gates = {"c{}".format(name) for name in supported_unitary_gates}
