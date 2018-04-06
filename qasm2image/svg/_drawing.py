@@ -217,8 +217,7 @@ def _draw_measure_gate(drawing: Drawing,
     else:
         # Draw the "measure" gate.
         _draw_unitary_gate(drawing, bit_gate_rank, measured_qubit, "M" + str(target_clbit),
-                           bit_mapping, index_to_draw=index_to_draw,
-                           font_size=_constants.GATE_FONT_SIZE/2)
+                           bit_mapping, index_to_draw=index_to_draw)
 
 
 
@@ -227,7 +226,6 @@ def _draw_unitary_gate(drawing: Drawing,                          #pylint: disab
                        qubit: int,
                        gate_name: str,
                        bit_mapping: dict,
-                       font_size: int = _constants.GATE_FONT_SIZE,
                        index_to_draw: int = None,
                        is_controlled_gate: bool = False) -> None:
     if index_to_draw is None:

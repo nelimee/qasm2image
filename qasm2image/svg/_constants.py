@@ -61,7 +61,6 @@ MEASURE_GATE_CLBIT_FILL_COLOR = 'black'
 
 # Font size
 REGISTER_NAME_FONT_SIZE = 200
-GATE_FONT_SIZE = 90
 # 1/3+1/30 is an experimental value that seems to work for
 # centering vertically the text. The initial value was 1/3
 # but the 1-character gate names were a little shifted up,
