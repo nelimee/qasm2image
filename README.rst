@@ -76,6 +76,68 @@ A script is provided to change QASM code directly from the command line.
                            scale of the PNG image. SVG output is not affected by
                            this parameter
 
+Output
+------
+
+`adder.qasm <https://github.com/nelimeee/qasm2image/blob/master/tests/examples/generic/adder.qasm>`_
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+.. image:: https://github.com/nelimeee/qasm2image/blob/master/images/adder_simple.png
+   :target: https://github.com/nelimeee/qasm2image/blob/master/images/adder_simple.png
+   :alt: adder.png
+
+
+`qft.qasm <https://github.com/nelimeee/qasm2image/blob/master/tests/examples/generic/qft.qasm>`_
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+.. image:: https://github.com/nelimeee/qasm2image/blob/master/images/qft_simple.png
+   :target: https://github.com/nelimeee/qasm2image/blob/master/images/qft_simple.png
+   :alt: qft.png
+
+
+`inverseqft1.qasm <https://github.com/nelimeee/qasm2image/blob/master/tests/examples/generic/inverseqft1.qasm>`_
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+.. image:: https://github.com/nelimeee/qasm2image/blob/master/images/inverseqft1_simple.png
+   :target: https://github.com/nelimeee/qasm2image/blob/master/images/inverseqft1_simple.png
+   :alt: inverseqft1.png
+
+
+`inverseqft2.qasm <https://github.com/nelimeee/qasm2image/blob/master/tests/examples/generic/inverseqft2.qasm>`_
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+.. image:: https://github.com/nelimeee/qasm2image/blob/master/images/inverseqft2_simple.png
+   :target: https://github.com/nelimeee/qasm2image/blob/master/images/inverseqft2_simple.png
+   :alt: inverseqft2.png
+
+
+`qec.qasm <https://github.com/nelimeee/qasm2image/blob/master/tests/examples/generic/qec.qasm>`_
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+.. image:: https://github.com/nelimeee/qasm2image/blob/master/images/qec_simple.png
+   :target: https://github.com/nelimeee/qasm2image/blob/master/images/qec_simple.png
+   :alt: qec.png
+
+
+.. image:: https://github.com/nelimeee/qasm2image/blob/master/images/qec_no_clbits.png
+   :target: https://github.com/nelimeee/qasm2image/blob/master/images/qec_no_clbits.png
+   :alt: qec\_no\_clbits.png
+
+
+`teleportv2.qasm <https://github.com/nelimeee/qasm2image/blob/master/tests/examples/generic/teleportv2.qasm>`_
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+.. image:: https://github.com/nelimeee/qasm2image/blob/master/images/teleportv2_simple.png
+   :target: https://github.com/nelimeee/qasm2image/blob/master/images/teleportv2_simple.png
+   :alt: teleportv2.png
+
+
 License
 -------
 

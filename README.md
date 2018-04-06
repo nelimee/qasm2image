@@ -69,6 +69,28 @@ optional arguments:
 
 ```
 
+## Output
+
+### [adder.qasm](https://github.com/nelimeee/qasm2image/blob/master/tests/examples/generic/adder.qasm)
+![adder.png](https://github.com/nelimeee/qasm2image/blob/master/images/adder_simple.png "adder.png")
+
+### [qft.qasm](https://github.com/nelimeee/qasm2image/blob/master/tests/examples/generic/qft.qasm)
+![qft.png](https://github.com/nelimeee/qasm2image/blob/master/images/qft_simple.png "qft.png")
+
+### [inverseqft1.qasm](https://github.com/nelimeee/qasm2image/blob/master/tests/examples/generic/inverseqft1.qasm)
+![inverseqft1.png](https://github.com/nelimeee/qasm2image/blob/master/images/inverseqft1_simple.png "inverseqft1.png")
+
+### [inverseqft2.qasm](https://github.com/nelimeee/qasm2image/blob/master/tests/examples/generic/inverseqft2.qasm)
+![inverseqft2.png](https://github.com/nelimeee/qasm2image/blob/master/images/inverseqft2_simple.png "inverseqft2.png")
+
+### [qec.qasm](https://github.com/nelimeee/qasm2image/blob/master/tests/examples/generic/qec.qasm)
+![qec.png](https://github.com/nelimeee/qasm2image/blob/master/images/qec_simple.png "qec.png")
+![qec\_no\_clbits.png](https://github.com/nelimeee/qasm2image/blob/master/images/qec_no_clbits.png "qec\_no\_clbits.png")
+
+### [teleportv2.qasm](https://github.com/nelimeee/qasm2image/blob/master/tests/examples/generic/teleportv2.qasm)
+![teleportv2.png](https://github.com/nelimeee/qasm2image/blob/master/images/teleportv2_simple.png "teleportv2.png")
+
+
 ## License
 
 This project is distributed under the [CeCILL-B](http://www.cecill.info/licences/Licence_CeCILL-B_V1-en.html) license. A copy of the whole license is included
