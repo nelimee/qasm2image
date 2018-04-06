@@ -242,6 +242,9 @@ def _draw_unitary_gate(drawing: Drawing,                          #pylint: disab
     desired_width = _constants.GATE_SIZE - 2*_constants.GATE_INSIDE_MARGIN
     desired_height = _constants.GATE_SIZE - 2*_constants.GATE_INSIDE_MARGIN
     font_size = _helpers.adapt_text_font_size(gate_name, desired_width, desired_height)
+    if is_controlled_gate:
+        font_size *= _constants.FONT_SIZE_REDUCTION_FACTOR_FOR_CONTROLLED_GATES
+
 
     drawing.add(drawing.text(gate_name,
                              insert=(x_coord, y_coord +

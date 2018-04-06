@@ -67,7 +67,7 @@ REGISTER_NAME_FONT_SIZE = 200
 # that is why the constant is in this form, 1/30 is just
 # here as "a little value".
 FONT_SIZE_CENTER_VERTICALLY_MULTIPLIER = 1/3 + 1/30
-
+FONT_SIZE_REDUCTION_FACTOR_FOR_CONTROLLED_GATES = 0.8
 # Other
 PARAMETERS_ROUND_DECIMAL = 2
 
