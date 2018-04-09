@@ -41,6 +41,8 @@ import sys
 import os
 from qasm2image import qasm2svg
 from qasm2image import qasm2png
+from qasm2image import qasm2ps
+from qasm2image import qasm2pdf
 
 def main():
     argument_parser = argparse.ArgumentParser( #pylint: disable=invalid-name
@@ -80,6 +82,18 @@ def main():
     elif arguments.output_file.endswith('.png'):
         with open(arguments.output_file, 'wb') as png_file:
             png_file.write(qasm2png(qasm_str,
+                                    arguments.basis,
+                                    not arguments.hide_clbits,
+                                    arguments.scale))
+    elif arguments.output_file.endswith('.ps'):
+        with open(arguments.output_file, 'wb') as ps_file:
+            ps_file.write(qasm2ps(qasm_str,
+                                  arguments.basis,
+                                  not arguments.hide_clbits,
+                                  arguments.scale))
+    elif arguments.output_file.endswith('.pdf'):
+        with open(arguments.output_file, 'wb') as pdf_file:
+            pdf_file.write(qasm2pdf(qasm_str,
                                     arguments.basis,
                                     not arguments.hide_clbits,
                                     arguments.scale))

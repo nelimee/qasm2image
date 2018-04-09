@@ -45,7 +45,8 @@ import sys
 import os
 # Add '..' in the Python path and import qasm2png
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from qasm2image import qasm2png
+from qasm2image import qasm2png, qasm2ps, qasm2pdf
+
 
 
 def recursive_check_all_qasm_files(directory, exception_expected = False):
@@ -73,15 +74,17 @@ def recursive_check_all_qasm_files(directory, exception_expected = False):
 
                     with open(qasm_file_path, 'r') as qasm_file:
                         qasm_str = qasm_file.read()
-                    qasms = {'simple': qasm2png(qasm_str),
-                             'no_clbits': qasm2png(qasm_str, show_clbits=False),
-                             'other_basis': qasm2png(qasm_str, basis='x,y,z,h,cx')}
+                    qasms = {'_simple.png'     : qasm2png(qasm_str),
+                             '_no_clbits.png'  : qasm2png(qasm_str, show_clbits=False),
+                             '_other_basis.png': qasm2png(qasm_str, basis='x,y,z,h,cx'),
+                             '_simple.pdf'     : qasm2pdf(qasm_str),
+                             '_simple.ps'      : qasm2ps(qasm_str)
+                    }
                     for suffix in qasms:
-                        png_file_path = os.path.join(root,
-                                                     test_file.replace('.qasm',
-                                                                       "_{}.png".format(suffix)))
-                        with open(png_file_path, 'wb') as png_file:
-                            png_file.write(qasms[suffix])
+                        file_path = os.path.join(root,
+                                                 test_file.replace('.qasm', suffix))
+                        with open(file_path, 'wb') as f:
+                            f.write(qasms[suffix])
                 except Exception as exception: #pylint: disable=broad-except
                     print(printed_text.replace("....", on_exception_str))
                     print(exception)

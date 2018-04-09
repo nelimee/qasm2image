@@ -190,9 +190,14 @@ tags
 
 tests/examples/generic/*.png
 tests/examples/generic/*.svg
+tests/examples/generic/*.ps
+tests/examples/generic/*.pdf
+
 
 tests/examples/ibmqx2/*.png
 tests/examples/ibmqx2/*.svg
+tests/examples/ibmqx2/*.ps
+tests/examples/ibmqx2/*.pdf
 
 build/*
 dist/*
