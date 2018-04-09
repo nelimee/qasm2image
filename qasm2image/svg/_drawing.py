@@ -421,8 +421,8 @@ def _draw_gate(drawing: Drawing,
                            index_to_draw=index_to_draw)
 
     # Warn the user we encountered a non-implemented gate.
-    if name.lower() not in supported_gates:
-        print("WARNING: Gate '{}' is not implemented".format(name))
+    if operation['name'].lower() not in supported_gates:
+        print("WARNING: Gate '{}' is not implemented".format(operation['name']))
 
     # And finally take care of our data structure that keeps track of the position
     # where we want to draw.
