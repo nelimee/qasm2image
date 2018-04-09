@@ -321,7 +321,8 @@ def _draw_gate(drawing: Drawing,
     supported_base_gates = set(unitary_gate_names) | set(['sdg','tdg'])
     supported_u_gates = {"u{}".format(i) for i in [1, 2, 3]} | set(['u'])
     supported_unitary_gates = supported_base_gates | supported_u_gates
-    supported_controled_gates = {"c{}".format(name) for name in supported_unitary_gates}
+    supported_controled_gates = ({"c{}".format(name) for name in supported_unitary_gates}
+                                 | {"cc{}".format(name) for name in supported_unitary_gates})
     supported_special_gates = set(['measure', 'barrier', 'reset'])
     supported_gates = supported_unitary_gates | supported_controled_gates | supported_special_gates
 
@@ -361,22 +362,26 @@ def _draw_gate(drawing: Drawing,
     # If the gate is a controlled one then draw the controlled part and let the
     # code just after draw the main gate.
     if name.lower().startswith('c'):
-        control_qubit = qubits[0]
-        target_qubit = qubits[1]
+        # Used to draw the line, we need the two qubits at the extremities.
+        upper_qubit = min(qubits)
+        lower_qubit = max(qubits)
+        control_qubits = qubits[:-1] # All the qubits except the last one
+        target_qubit   = qubits[-1]  # The last qubit is the target
 
         # Draw the line, then the little control circle
         _draw_line_between_qubits(drawing,
                                   bit_gate_rank['qubits'],
-                                  control_qubit,
-                                  target_qubit,
+                                  upper_qubit,
+                                  lower_qubit,
                                   bit_mapping,
                                   index_to_draw)
-        _draw_control_circle(drawing,
-                             _helpers.get_x_from_index(index_to_draw),
-                             _helpers.get_y_from_quantum_register(control_qubit, bit_mapping),
-                             True)
-        # Then if it's a CX gate, draw the nice CX gate.
-        if name.lower() == "cx":
+        for control_qubit in control_qubits:
+            _draw_control_circle(drawing,
+                                 _helpers.get_x_from_index(index_to_draw),
+                                 _helpers.get_y_from_quantum_register(control_qubit, bit_mapping),
+                                 True)
+        # Then if it's a (C)CX gate, draw the stylised (C)CX gate.
+        if name.lower().lstrip('c') == 'x':
             _draw_cnot_cross(drawing,
                              _helpers.get_x_from_index(index_to_draw),
                              _helpers.get_y_from_quantum_register(target_qubit, bit_mapping))
