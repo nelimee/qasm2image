@@ -34,7 +34,7 @@
 Requires:
     - cairosvg module
     - qiskit module from qasm2svg module
-    - svgwrite module from svg.drawing module
+    - svgwrite module from svg._drawing module
 """
 
 from typing import Sequence
