@@ -183,6 +183,41 @@ def _draw_gate_rect(drawing: Drawing,
                              stroke_width=_constants.STROKE_THICKNESS))
 
 
+def _draw_swap_cross(drawing: Drawing,
+                     x_coord: float,
+                     y_coord: float) -> None:
+    # Draw the cross
+    drawing.add(drawing.line(start=(x_coord - _constants.GATE_SIZE/2,
+                                    y_coord - _constants.GATE_SIZE/2),
+                             end=(x_coord + _constants.GATE_SIZE/2,
+                                  y_coord + _constants.GATE_SIZE/2),
+                             stroke=_constants.GATE_BORDER_COLOR,
+                             stroke_width=_constants.STROKE_THICKNESS))
+
+    drawing.add(drawing.line(start=(x_coord + _constants.GATE_SIZE/2,
+                                    y_coord - _constants.GATE_SIZE/2),
+                             end=(x_coord - _constants.GATE_SIZE/2,
+                                  y_coord + _constants.GATE_SIZE/2),
+                             stroke=_constants.GATE_BORDER_COLOR,
+                             stroke_width=_constants.STROKE_THICKNESS))
+
+def _draw_swap_gate(drawing: Drawing,
+                    bit_gate_rank: BitRankType,
+                    q1: int,
+                    q2: int,
+                    bit_mapping: dict) -> None:
+
+    index_to_draw, _ = _helpers.get_max_index(bit_gate_rank,
+                                              qubits=[q1, q2])
+    x_coord = _helpers.get_x_from_index(index_to_draw)
+    yq1_coord = _helpers.get_y_from_quantum_register(q1, bit_mapping)
+    yq2_coord = _helpers.get_y_from_quantum_register(q2, bit_mapping)
+
+    _draw_swap_cross(drawing, x_coord, yq1_coord)
+    _draw_swap_cross(drawing, x_coord, yq2_coord)
+    _draw_line_between_qubits(drawing, bit_gate_rank, q1, q2, bit_mapping, index_to_draw)
+
+
 def _draw_measure_gate(drawing: Drawing,
                        bit_gate_rank: BitRankType,
                        measured_qubit: int,
@@ -323,7 +358,7 @@ def _draw_gate(drawing: Drawing,
     supported_unitary_gates = supported_base_gates | supported_u_gates
     supported_controled_gates = ({"c{}".format(name) for name in supported_unitary_gates}
                                  | {"cc{}".format(name) for name in supported_unitary_gates})
-    supported_special_gates = set(['measure', 'barrier', 'reset'])
+    supported_special_gates = set(['measure', 'barrier', 'reset', 'swap'])
     supported_gates = supported_unitary_gates | supported_controled_gates | supported_special_gates
 
     name = operation['name']
@@ -358,6 +393,10 @@ def _draw_gate(drawing: Drawing,
     # If it is a reset gate, then draw a unitary gate with 'reset' name.
     if name == 'reset':
         _draw_unitary_gate(drawing, bit_gate_rank, qubits[0], name + name_conditional_part, bit_mapping)
+
+    # If it is a swap gate, then draw the specific gate.
+    if name == 'swap':
+        _draw_swap_gate(drawing, bit_gate_rank, qubits[0], qubits[1], bit_mapping)
 
     # If the gate is a controlled one then draw the controlled part and let the
     # code just after draw the main gate.
