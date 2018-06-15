@@ -36,15 +36,8 @@
 Type './qasm2image.py -h' for more informations.
 """
 
-import argparse
-import sys
-import os
-from qasm2image import qasm2svg
-from qasm2image import qasm2png
-from qasm2image import qasm2ps
-from qasm2image import qasm2pdf
-
 def main():
+    import argparse
     argument_parser = argparse.ArgumentParser( #pylint: disable=invalid-name
         description='Transform a quantum circuit in QASM format to an image format.')
 
@@ -67,6 +60,11 @@ def main():
     #                              help='bit ordering on the drawing')
 
     arguments = argument_parser.parse_args() #pylint: disable=invalid-name
+
+    from qasm2image import qasm2svg
+    from qasm2image import qasm2png
+    from qasm2image import qasm2ps
+    from qasm2image import qasm2pdf
 
     # Read the QASM code.
     with open(arguments.input_file, 'r') as qasm_file:
