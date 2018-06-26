@@ -369,6 +369,7 @@ def _draw_gate(drawing: Drawing,
         if show_clbits:
             _draw_classically_conditioned_part(drawing, bit_gate_rank, operation, bit_mapping)
         else:
+            #TODO: Change 'c' by the name of the classical register.
             name_conditional_part = "[c={}]".format(int(operation['conditional']['val'], 0))
 
     # Tag needed later

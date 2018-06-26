@@ -1,4 +1,3 @@
-
 import sys
 
 from . import qasm2svg
