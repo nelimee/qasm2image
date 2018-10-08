@@ -32,24 +32,22 @@
 """This module contain the function qasm2svg.
 
 The function qasm2svg draw a quantum circuit as a SVG image string.
-
-Requires:
-    - qiskit module
-    - svgwrite module from svg.drawing module
 """
 
 from typing import Tuple, Union
+
 import qiskit
 
-from .svg import _drawing
+from qasm2image.svg import _drawing
 
-QubitType = Tuple[qiskit.QuantumRegister, int] #pylint: disable=invalid-name
+QubitType = Tuple[qiskit.QuantumRegister, int]
+
 
 def qasm2svg(qasm_str: str,
              basis: str = ('id,u0,u1,u2,u3,x,y,z,h,s,sdg,t,tdg,rx,ry,rz,'
                            'cx,cy,cz,ch,crz,cu1,cu3,swap,ccx'),
-             show_clbits: bool = True,
-             output_dimensions: bool = False) -> Union[str, Tuple[str, Tuple[int, int]]]:
+             show_clbits: bool = True, output_dimensions: bool = False) -> \
+    Union[str, Tuple[str, Tuple[int, int]]]:
     """Transform a QASM code to an SVG file.
 
     This method output the SVG representation of the quantum circuit
@@ -68,21 +66,25 @@ def qasm2svg(qasm_str: str,
         show_clbits (bool): Flag that control the drawing of classical bit
                             lines.
         output_dimensions (bool): Flag that control the output of the function.
-                            If set to True, the return type will be (str, (str, str))
-                            for (SVG, (width, height)). Else, the function will only
+                            If set to True, the return type will be (str,
+                            (str, str))
+                            for (SVG, (width, height)). Else, the function
+                            will only
                             return the SVG representation.
     Returns:
         Union[str, Tuple[str, Tuple[int, int]]]: SVG or (SVG, (width, height))
     """
 
-    # Then uncompile the QASM code to recover the gates to draw.
+    # Uncompile the QASM code to recover the gates to draw.
     ast = qiskit.qasm.Qasm(data=qasm_str).parse()
-    unroller = qiskit.unroll.Unroller(ast, qiskit.unroll.JsonBackend(basis.split(',')))
+    unroller = qiskit.unroll.Unroller(ast, qiskit.unroll.JsonBackend(
+        basis.split(',')))
     unroller.execute()
     json_circuit = unroller.backend.circuit
 
-    svg_repr, (width, height) = _drawing._draw_json_circuit(json_circuit, show_clbits=show_clbits)
+    svg_repr, (width, height) = _drawing.draw_json_circuit(json_circuit,
+                                                           show_clbits=show_clbits)
     if not output_dimensions:
         return svg_repr
 
-    return (svg_repr, (width, height))
+    return svg_repr, (width, height)
