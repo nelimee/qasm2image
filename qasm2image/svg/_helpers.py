@@ -188,9 +188,9 @@ def _get_circuit_width(json_circuit) -> int:
         cx q[0], q[5];
         cx q[1], q[6];
 
-    The 2 operations above are completely independent and could be performed
+    The 2 instructions above are completely independent and could be performed
     in parallel (in one time step). But the graphic representations of these 2
-    operations overlap: the CNOT lines will overlap between the qubits 1 and 5.
+    instructions overlap: the CNOT lines will overlap between the qubits 1 and 5.
     This situation will then output a "width" of 2, even if the width of the
     circuit in the sense of quantum computing is 1.
 
@@ -214,27 +214,27 @@ def _get_circuit_width(json_circuit) -> int:
     index_last_gate_on_reg = {
         'clbits': [0] * max(clbits_number, 1),
         'qubits': [0] * max(qubits_number, 1)}
-    # For each operation
-    for operation in json_circuit['operations']:
-        _update_data_structure(index_last_gate_on_reg, operation)
+    # For each instruction
+    for instruction in json_circuit['instructions']:
+        _update_data_structure(index_last_gate_on_reg, instruction)
 
     return max(max(index_last_gate_on_reg['clbits']),
                max(index_last_gate_on_reg['qubits']))
 
 
-def get_max_index(bit_gate_rank: _types.BitRankType, operation=None,
+def get_max_index(bit_gate_rank: _types.BitRankType, instruction=None,
                   qubits=None, clbits=None) -> \
         Tuple[int, Tuple[int, int, int, int]]:
     """Compute the maximum x index with an overlap.
 
     The maximum x index with an overlap is the maximum column index
-    where the representation of the 'operation' (see below) would
+    where the representation of the 'instruction' (see below) would
     overlap with an already drawn gate representation.
 
-    The algorithm to determine the 'operation' is:
-    1) If the operation parameter is not None, then data is extracted
+    The algorithm to determine the 'instruction' is:
+    1) If the instruction parameter is not None, then data is extracted
        from it.
-    2) If the operation parameter is None and at least one of the qubits
+    2) If the instruction parameter is None and at least one of the qubits
        and clbits parameters is set, then data is extracted from the
        qubits and clbits parameters.
     3) Else, an exception is raised.
@@ -254,7 +254,7 @@ def get_max_index(bit_gate_rank: _types.BitRankType, operation=None,
                                     ...,
                                     0 ]
                       }
-        operation (dict): Dictionnary representing the current operation.
+        instruction (dict): Dictionnary representing the current instruction.
            Structure: see qiskit data structures.
         qubits (list): A list of quantum bits.
         clbits (list): A list of classical bits.
@@ -274,12 +274,12 @@ def get_max_index(bit_gate_rank: _types.BitRankType, operation=None,
                The ranges can be empty, i.e. it is possible that minq = 0 and
                maxq = -1 or minc = 0 and maxc = -1.
     Raises:
-        RuntimeError: when no operation, no qubits and no clbits are given to
+        RuntimeError: when no instruction, no qubits and no clbits are given to
         the function.
     """
 
-    if operation is None and qubits is None and clbits is None:
-        raise RuntimeError("You should provide either an operation or a bit "
+    if instruction is None and qubits is None and clbits is None:
+        raise RuntimeError("You should provide either an instruction or a bit "
                            "(quantum or classical) to get_max_index.")
 
     # By default, [minq,maxq] and [minc,maxc] are set to None.
@@ -293,9 +293,9 @@ def get_max_index(bit_gate_rank: _types.BitRankType, operation=None,
     if clbits is None:
         clbits = []
 
-    # We compute the qubits and clbits involved in the operation
-    if operation is not None:
-        qubits, clbits = get_involved_bits(operation)
+    # We compute the qubits and clbits involved in the instruction
+    if instruction is not None:
+        qubits, clbits = get_involved_bits(instruction)
 
     # We update with the given sequences of qubits and clbits.
     if qubits:
@@ -360,16 +360,16 @@ def adapt_text_font_size(text: str, desired_width: Union[int, float],
 
 
 def _update_data_structure(bit_gate_rank: _types.BitRankType,
-                           operation) -> None:
+                           instruction) -> None:
     # By default we increment the current index by 1
     increment = 1
-    # But not when the operation is a 'barrier' operation
-    if operation['name'] == 'barrier':
+    # But not when the instruction is a 'barrier' instruction
+    if instruction['name'] == 'barrier':
         increment = 0
 
     # Compute the values to update.
     index_to_update, (minq, maxq, minc, maxc) = get_max_index(bit_gate_rank,
-                                                              operation=operation)
+                                                              instruction=instruction)
     # And perform the update.
     for qubit in range(minq, maxq + 1):
         bit_gate_rank['qubits'][qubit] = index_to_update + increment
@@ -377,16 +377,16 @@ def _update_data_structure(bit_gate_rank: _types.BitRankType,
         bit_gate_rank['clbits'][clbit] = index_to_update + increment
 
 
-def get_involved_bits(operation) -> Tuple[Sequence[int], Sequence[int]]:
-    """Returns the bits involved in the operation.
+def get_involved_bits(instruction) -> Tuple[Sequence[int], Sequence[int]]:
+    """Returns the bits involved in the instruction.
 
-    :param operation: The operation of interest.
-    :return: The quantum and classical bits used by the considered operation.
+    :param instruction: The instruction of interest.
+    :return: The quantum and classical bits used by the considered instruction.
     """
-    qubits = operation.get('qubits', [])
-    clbits = operation.get('clbits', [])
-    if 'conditional' in operation:
-        mask = int(operation['conditional']['mask'], 0)
+    qubits = instruction.get('qubits', [])
+    clbits = instruction.get('clbits', [])
+    if 'conditional' in instruction:
+        mask = int(instruction['conditional']['mask'], 0)
         number_of_clbits = len(bin(mask)[2:])
         clbits += list(range(number_of_clbits))
 

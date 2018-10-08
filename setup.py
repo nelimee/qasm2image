@@ -121,7 +121,7 @@ setup(
     # https://packaging.python.org/en/latest/requirements.html
     install_requires=['cairosvg',
                       'cairocffi',
-                      'qiskit>=0.5',
+                      'qiskit>=0.6',
                       'svgwrite',
     ],  # Optional
 
