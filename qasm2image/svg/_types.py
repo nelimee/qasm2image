@@ -1,5 +1,5 @@
 # ======================================================================
-# Copyright CERFACS (February 2018)
+# Copyright CERFACS (October 2018)
 # Contributor: Adrien Suau (suau@cerfacs.fr)
 #
 # This software is governed by the CeCILL-B license under French law and
@@ -29,45 +29,8 @@
 # knowledge of the CeCILL-B license and that you accept its terms.
 # ======================================================================
 
-"""This module provide the qasm2pdf function."""
+"""Type definition for the whole module."""
 
-from cairosvg import svg2pdf
+import typing
 
-from qasm2image import qasm2svg
-
-
-def qasm2pdf(qasm_str: str,
-             basis: str = ('id,u0,u1,u2,u3,x,y,z,h,s,sdg,t,tdg,rx,ry,rz,'
-                           'cx,cy,cz,ch,crz,cu1,cu3,swap,ccx'),
-             show_clbits: bool = True, scale: float = 1.0) -> bytes:
-    """Transform a QASM code to a PDF file.
-
-    This method output the PDF representation of the quantum circuit
-    provided as a QASM program.
-
-    Remark: not all gates are implemented. If a gate is not implemented
-            then a message will be printed to warn the user and the gate
-            will not be drawn in the PDF.
-            If you want to implement more gates see the _draw_gate method
-            in ./svg/drawing.py.
-
-    Args:
-        qasm_str    (str)  : The QASM quantum circuit to draw in PDF.
-        basis       (list) : The gate basis used to represent the circuit.
-        show_clbits (bool) : Flag that control the drawing of classical bit
-                             lines.
-        scale       (float): The scaling imposed to the produced PostScript
-        file.
-
-    Returns:
-        bytes: The PDF representation of the given QASM circuit.
-    """
-
-    # Generate the SVG first.
-    svg, (_, _) = qasm2svg.qasm2svg(qasm_str, basis=basis,
-                                    show_clbits=show_clbits,
-                                    output_dimensions=True)
-    # And generate PDF
-    pdf_bytes = svg2pdf(bytestring=svg.encode('utf-8'), scale=scale)
-
-    return pdf_bytes
+BitRankType = typing.Dict[str, typing.List[int]]

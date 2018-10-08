@@ -1,3 +1,5 @@
+cairocffi
 cairosvg
 qiskit
 svgwrite
+colorama

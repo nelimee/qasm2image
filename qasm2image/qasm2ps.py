@@ -29,24 +29,17 @@
 # knowledge of the CeCILL-B license and that you accept its terms.
 # ======================================================================
 
-"""This module provide the qasm2ps function.
+"""This module provide the qasm2ps function."""
 
-Requires:
-    - cairosvg module
-    - qiskit module from qasm2svg module
-    - svgwrite module from svg._drawing module
-"""
+from cairosvg import svg2ps
 
-# Pylint fails to parse the svg2png function in cairosvg.
-# Probably because the functions are generated when the module is imported.
-from cairosvg import svg2ps #pylint: disable=no-name-in-module
-from . import qasm2svg
+from qasm2image import qasm2svg
+
 
 def qasm2ps(qasm_str: str,
             basis: str = ('id,u0,u1,u2,u3,x,y,z,h,s,sdg,t,tdg,rx,ry,rz,'
                           'cx,cy,cz,ch,crz,cu1,cu3,swap,ccx'),
-            show_clbits: bool = True,
-            scale: float = 1.0) -> bytes:
+            show_clbits: bool = True, scale: float = 1.0) -> bytes:
     """Transform a QASM code to a PS file.
 
     This method output the PostScript representation of the quantum circuit
@@ -63,16 +56,17 @@ def qasm2ps(qasm_str: str,
         basis       (list) : The gate basis used to represent the circuit.
         show_clbits (bool) : Flag that control the drawing of classical bit
                              lines.
-        scale       (float): The scaling imposed to the produced PostScript file.
+        scale       (float): The scaling imposed to the produced PostScript
+        file.
 
     Returns:
         bytes: The PostScript representation of the given QASM circuit.
     """
 
     # Generate the SVG first.
-    svg, (width, height) = qasm2svg.qasm2svg(qasm_str, basis=basis,
-                                             show_clbits=show_clbits,
-                                             output_dimensions=True)
+    svg, (_, _) = qasm2svg.qasm2svg(qasm_str, basis=basis,
+                                    show_clbits=show_clbits,
+                                    output_dimensions=True)
     # And generate PS
     ps_bytes = svg2ps(bytestring=svg.encode('utf-8'), scale=scale)
 

@@ -50,7 +50,6 @@ VERTICAL_BORDER = 100
 REGISTER_LINES_VERTICAL_SPACING = 150
 DOUBLE_LINES_SEPARATION = 2
 
-
 # Colors
 GATE_FILL_COLOR = 'white'
 GATE_BORDER_COLOR = 'black'
@@ -66,13 +65,18 @@ REGISTER_NAME_FONT_SIZE = 200
 # but the 1-character gate names were a little shifted up,
 # that is why the constant is in this form, 1/30 is just
 # here as "a little value".
-FONT_SIZE_CENTER_VERTICALLY_MULTIPLIER = 1/3 + 1/30
+FONT_SIZE_CENTER_VERTICALLY_MULTIPLIER = 1 / 3 + 1 / 30
 FONT_SIZE_REDUCTION_FACTOR_FOR_CONTROLLED_GATES = 0.8
+
 # Other
 PARAMETERS_ROUND_DECIMAL = 2
+# We need to fix a maximum size for the PNG and adapt the scale variable
+# *before* calling svg2png. If we call svg2png before adapting the scale,
+# very large outputs will SEGFAULT because of cairo.
+MAX_PNG_SIZE_PX = 20000 * 20000
 
 # Checks
-assert REGISTER_LINES_VERTICAL_SPACING > GATE_SIZE, ("Gates may vertically overlap with the " +
-                                                     "given constants.")
-assert VERTICAL_BORDER > GATE_SIZE/2, ("Gates may be drawn outside the image with the given " +
-                                       "constants.")
+assert REGISTER_LINES_VERTICAL_SPACING > GATE_SIZE, \
+    "Gates may vertically overlap with the given constants."
+assert VERTICAL_BORDER > GATE_SIZE / 2, \
+    "Gates may be drawn outside the image with the given constants."

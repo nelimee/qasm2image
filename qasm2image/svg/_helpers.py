@@ -35,11 +35,12 @@ The functions here are used in many places in the code of qasm2svg
 and needed to be in a separate module.
 """
 import os
-from typing import Tuple, Sequence, Union, Dict
-from . import _constants #pylint: disable=relative-beyond-top-level
+from typing import Tuple, Sequence, Union
 
-BitRankType = Dict[str, Sequence[int]] #pylint: disable=invalid-name
-QubitType = Tuple[str, int] #pylint: disable=invalid-name
+from qasm2image.svg import _constants, _types
+
+QubitType = Tuple[str, int]
+
 
 def get_x_from_index(index: int) -> int:
     """Compute the x-coordinate with the provided x index.
@@ -71,11 +72,13 @@ def get_x_from_index(index: int) -> int:
     """
     x_coord = _constants.REGISTER_NAME_WIDTH
     x_coord += _constants.GATE_LEFT_BORDER
-    x_coord += index * (_constants.GATE_SIZE + _constants.GATE_HORIZONTAL_SPACING)
+    x_coord += index * (
+        _constants.GATE_SIZE + _constants.GATE_HORIZONTAL_SPACING)
     x_coord += _constants.GATE_SIZE / 2
     return x_coord
 
-def get_y_from_quantum_register(quantum_register_index_in_JSON: int,
+
+def get_y_from_quantum_register(qreg_index_in_json: int,
                                 bit_mapping: dict) -> int:
     """Compute the y-coordinate associated to the given quantum register.
 
@@ -96,11 +99,12 @@ def get_y_from_quantum_register(quantum_register_index_in_JSON: int,
            number quantum_register_index.
     """
     y_coord = _constants.VERTICAL_BORDER
-    index_to_draw = bit_mapping['qubits'][quantum_register_index_in_JSON]
+    index_to_draw = bit_mapping['qubits'][qreg_index_in_json]
     y_coord += index_to_draw * _constants.REGISTER_LINES_VERTICAL_SPACING
     return y_coord
 
-def get_y_from_classical_register(classical_register_index_in_JSON: int,
+
+def get_y_from_classical_register(clreg_index_in_json: int,
                                   quantum_registers_number: int,
                                   bit_mapping: dict) -> int:
     """Compute the y-coordinate associated to the given classical register.
@@ -109,7 +113,7 @@ def get_y_from_classical_register(classical_register_index_in_JSON: int,
     classical ones.
 
     Parameters:
-        classical_register_index_in_JSON (int): identifier of the classical
+        clreg_index_in_json (int): identifier of the classical
                                 from the JSON circuit representation.
         quantum_registers_number (int): Number of quantum registers in the
                                         circuit.
@@ -124,10 +128,11 @@ def get_y_from_classical_register(classical_register_index_in_JSON: int,
            number classical_register_index.
     """
     y_coord = _constants.VERTICAL_BORDER
-    cl_index_to_draw = bit_mapping['clbits'][classical_register_index_in_JSON]
+    cl_index_to_draw = bit_mapping['clbits'][clreg_index_in_json]
     index_to_draw = quantum_registers_number + cl_index_to_draw
     y_coord += index_to_draw * _constants.REGISTER_LINES_VERTICAL_SPACING
     return y_coord
+
 
 def get_dimensions(json_circuit, show_clbits: bool) -> Tuple[int, int]:
     """Compute the width and height of the given circuit.
@@ -156,14 +161,15 @@ def get_dimensions(json_circuit, show_clbits: bool) -> Tuple[int, int]:
 
     width = _constants.REGISTER_NAME_WIDTH
     width += _constants.GATE_LEFT_BORDER
-    width += circuit_gates_number * (_constants.GATE_SIZE + _constants.GATE_HORIZONTAL_SPACING)
+    width += circuit_gates_number * (
+        _constants.GATE_SIZE + _constants.GATE_HORIZONTAL_SPACING)
     width -= _constants.GATE_HORIZONTAL_SPACING
     width += _constants.GATE_RIGHT_BORDER
 
     height = _constants.VERTICAL_BORDER
-    height += (register_number-1) * _constants.REGISTER_LINES_VERTICAL_SPACING
+    height += (register_number - 1) * _constants.REGISTER_LINES_VERTICAL_SPACING
     height += _constants.VERTICAL_BORDER
-    return (width, height)
+    return width, height
 
 
 def _get_circuit_width(json_circuit) -> int:
@@ -205,8 +211,9 @@ def _get_circuit_width(json_circuit) -> int:
 
     clbits_number = json_circuit['header'].get('number_of_clbits', 0)
     qubits_number = json_circuit['header'].get('number_of_qubits', 0)
-    index_last_gate_on_reg = {'clbits' : [0] * max(clbits_number, 1),
-                              'qubits' : [0] * max(qubits_number, 1)}
+    index_last_gate_on_reg = {
+        'clbits': [0] * max(clbits_number, 1),
+        'qubits': [0] * max(qubits_number, 1)}
     # For each operation
     for operation in json_circuit['operations']:
         _update_data_structure(index_last_gate_on_reg, operation)
@@ -214,10 +221,10 @@ def _get_circuit_width(json_circuit) -> int:
     return max(max(index_last_gate_on_reg['clbits']),
                max(index_last_gate_on_reg['qubits']))
 
-def get_max_index(bit_gate_rank,
-                  operation = None,
-                  qubits = None,
-                  clbits = None) -> Tuple[int, Tuple[int, int, int, int]]:
+
+def get_max_index(bit_gate_rank: _types.BitRankType, operation=None,
+                  qubits=None, clbits=None) -> \
+        Tuple[int, Tuple[int, int, int, int]]:
     """Compute the maximum x index with an overlap.
 
     The maximum x index with an overlap is the maximum column index
@@ -241,7 +248,8 @@ def get_max_index(bit_gate_rank,
                                     ...,
                                     10 ], # last drawn gate on the last qubit
                                           # is in the tenth column.
-                       'clbits' : [ 1,    # last drawn gate on the first classical
+                       'clbits' : [ 1,    # last drawn gate on the first
+                       classical
                                           # bit is on the first column.
                                     ...,
                                     0 ]
@@ -266,12 +274,13 @@ def get_max_index(bit_gate_rank,
                The ranges can be empty, i.e. it is possible that minq = 0 and
                maxq = -1 or minc = 0 and maxc = -1.
     Raises:
-        RuntimeError: when no operation, no qubits and no clbits are given to the function.
+        RuntimeError: when no operation, no qubits and no clbits are given to
+        the function.
     """
 
     if operation is None and qubits is None and clbits is None:
-        raise RuntimeError("You should provide either an operation or a bit (quantum "
-                           "or classical) to get_max_index.")
+        raise RuntimeError("You should provide either an operation or a bit "
+                           "(quantum or classical) to get_max_index.")
 
     # By default, [minq,maxq] and [minc,maxc] are set to None.
     # Same for the index we are searching.
@@ -291,31 +300,34 @@ def get_max_index(bit_gate_rank,
     # We update with the given sequences of qubits and clbits.
     if qubits:
         minq = min(qubits)
-        maxq = max(qubits) if not clbits else len(bit_gate_rank['qubits'])-1
-        max_index_q = max([bit_gate_rank['qubits'][qubit] for qubit in range(minq, maxq+1)])
+        maxq = max(qubits) if not clbits else len(bit_gate_rank['qubits']) - 1
+        max_index_q = max(
+            [bit_gate_rank['qubits'][qubit] for qubit in range(minq, maxq + 1)])
     if clbits:
         minc = min(clbits) if not qubits else 0
         maxc = max(clbits)
-        max_index_c = max([bit_gate_rank['clbits'][clbit] for clbit in range(minc, maxc+1)])
+        max_index_c = max(
+            [bit_gate_rank['clbits'][clbit] for clbit in range(minc, maxc + 1)])
 
     if minq is None:
         minq, maxq = 0, -1
     if minc is None:
         minc, maxc = 0, -1
 
-    return tuple((max(max_index_c, max_index_q),
-                  tuple((minq, maxq, minc, maxc))))
+    return max(max_index_c, max_index_q), (minq, maxq, minc, maxc)
 
-def _get_text_dimensions(text:str, fontsize:int):
+
+def _get_text_dimensions(text: str, fontsize: int):
     try:
         import cairocffi as cairo
     except ImportError:
         return len(text) * fontsize, fontsize
     surface = cairo.SVGSurface('undefined65761354373731713.svg', 1280, 200)
     cairo_context = cairo.Context(surface)
-    cairo_context.select_font_face('Arial', cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_BOLD)
+    cairo_context.select_font_face('Arial', cairo.FONT_SLANT_NORMAL,
+                                   cairo.FONT_WEIGHT_BOLD)
     cairo_context.set_font_size(fontsize)
-    xbearing, ybearing, width, height, xadvance, yadvance = cairo_context.text_extents(text)
+    _, _, width, height, _, _ = cairo_context.text_extents(text)
 
     # Don't forget to remove the undefined65761354373731713.svg file
     os.remove("undefined65761354373731713.svg")
@@ -323,25 +335,32 @@ def _get_text_dimensions(text:str, fontsize:int):
     return width, height
 
 
-def adapt_text_font_size(text:str,
-                         desired_width:Union[int,float],
-                         desired_height:Union[int,float]) -> int:
-    # Take an arbitrary initial font size, big enought to lower the errors of the
-    # computations below
+def adapt_text_font_size(text: str, desired_width: Union[int, float],
+                         desired_height: Union[int, float]) -> int:
+    """
+
+    :param text: The text whose size needs to be adapted.
+    :param desired_width: The maximal width we want to obtain for the text.
+    :param desired_height: The maximal height we want to obtain for the text.
+    :return: The font-size that will make the text have the desired dimensions.
+    """
+    # Take an arbitrary initial font size, big enough to lower the errors of
+    # the computations below
     initial_font_size = 100
-    # Draw the text. To draw the text with the best font size (not too small nor too big)
-    # we compute its width with a known font size and adapt the real font size.
+    # Draw the text. To draw the text with the best font size (not too small
+    # nor too big) we compute its width with a known font size and adapt the
+    # real font size.
     text_width, text_height = _get_text_dimensions(text, initial_font_size)
-    # We want to fit the full gate name to the gate box, so we compute the scaling factor
-    # needed to fit the gate name.
-    font_scale = max(text_width/desired_width, text_height/desired_height)
-    # Finally we do the assumption that applying a scaling factor to the font size is the
-    # same as applying this scaling factor to the rendered text.
+    # We want to fit the full gate name to the gate box, so we compute the
+    # scaling factor needed to fit the gate name.
+    font_scale = max(text_width / desired_width, text_height / desired_height)
+    # Finally we do the assumption that applying a scaling factor to the font
+    # size is the same as applying this scaling factor to the rendered text.
     return int(initial_font_size / font_scale)
 
-def _update_data_structure(bit_gate_rank: BitRankType,
-                           operation) -> None:
 
+def _update_data_structure(bit_gate_rank: _types.BitRankType,
+                           operation) -> None:
     # By default we increment the current index by 1
     increment = 1
     # But not when the operation is a 'barrier' operation
@@ -349,14 +368,21 @@ def _update_data_structure(bit_gate_rank: BitRankType,
         increment = 0
 
     # Compute the values to update.
-    index_to_update, (minq, maxq, minc, maxc) = get_max_index(bit_gate_rank, operation=operation)
+    index_to_update, (minq, maxq, minc, maxc) = get_max_index(bit_gate_rank,
+                                                              operation=operation)
     # And perform the update.
-    for qubit in range(minq, maxq+1):
+    for qubit in range(minq, maxq + 1):
         bit_gate_rank['qubits'][qubit] = index_to_update + increment
-    for clbit in range(minc, maxc+1):
+    for clbit in range(minc, maxc + 1):
         bit_gate_rank['clbits'][clbit] = index_to_update + increment
 
-def get_involved_bits(operation) -> Tuple[Sequence[QubitType], Sequence[QubitType]]:
+
+def get_involved_bits(operation) -> Tuple[Sequence[int], Sequence[int]]:
+    """Returns the bits involved in the operation.
+
+    :param operation: The operation of interest.
+    :return: The quantum and classical bits used by the considered operation.
+    """
     qubits = operation.get('qubits', [])
     clbits = operation.get('clbits', [])
     if 'conditional' in operation:
@@ -364,4 +390,4 @@ def get_involved_bits(operation) -> Tuple[Sequence[QubitType], Sequence[QubitTyp
         number_of_clbits = len(bin(mask)[2:])
         clbits += list(range(number_of_clbits))
 
-    return (qubits, clbits)
+    return qubits, clbits
