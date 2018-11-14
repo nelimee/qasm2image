@@ -281,26 +281,26 @@ def _draw_unitary_gate(drawing: Drawing, bit_gate_rank: _types.BitRankType,
 
 def _draw_classically_conditioned_part(drawing: Drawing,
                                        bit_gate_rank: _types.BitRankType,
-                                       operation, bit_mapping: dict) -> None:
-    """Draw the line and the controls for classically controlled operations.
+                                       instruction, bit_mapping: dict) -> None:
+    """Draw the line and the controls for classically controlled instructions.
 
     :param drawing: an instance of svgwrite.Drawing, used to write the SVG.
     :param bit_gate_rank: see module documentation for more information on this
     data structure.
-    :param operation: A QISKit operation. The dict has a key 'conditional'
+    :param instruction: A QISKit instruction. The dict has a key 'conditional'
     associated to an other Python dict with entries:
-        'type': the type of the operation. For example 'equals'.
+        'type': the type of the instruction. For example 'equals'.
         'mask': the classical bits used (?)
         'val' : the value compared with 'type' comparator to the classical bit.
     :param bit_mapping:
-    :raise NotImplementedError: if the given operation affects more than 1
+    :raise NotImplementedError: if the given instruction affects more than 1
     qubit.
     """
 
-    qubits = operation['qubits']
+    qubits = instruction['qubits']
     if len(qubits) > 1:
         raise NotImplementedError("Classically controlled multi-qubit "
-                                  "operations are not implemented for the "
+                                  "instructions are not implemented for the "
                                   "moment.")
     total_qubits_number = len(bit_gate_rank['qubits'])
     total_clbits_number = len(bit_gate_rank['clbits'])
@@ -308,8 +308,8 @@ def _draw_classically_conditioned_part(drawing: Drawing,
     # We take the binary little-endian representation of the value that
     # should be compared with the value stored in classical registers.
     # int(x, 0) let the 'int' function choose automatically the good basis.
-    value = int(operation['conditional']['val'], 0)
-    mask = int(operation['conditional']['mask'], 0)
+    value = int(instruction['conditional']['val'], 0)
+    mask = int(instruction['conditional']['mask'], 0)
     # The [2:] is to remove the "Ob" part returned by the "bin" function.
     # The [::-1] is to reverse the list order, to have a little-endian
     # representation.
@@ -320,7 +320,7 @@ def _draw_classically_conditioned_part(drawing: Drawing,
 
     # Compute the important coordinates.
     index_to_draw, _ = _helpers.get_max_index(bit_gate_rank,
-                                              operation=operation)
+                                              instruction=instruction)
     x_coord = _helpers.get_x_from_index(index_to_draw)
     yq_coord = _helpers.get_y_from_quantum_register(qubits[0], bit_mapping)
     yc_coord = _helpers.get_y_from_classical_register(number_of_clbits - 1,
@@ -339,7 +339,7 @@ def _draw_classically_conditioned_part(drawing: Drawing,
         _draw_control_circle(drawing, x_coord, y_coord, clbit_should_be_1)
 
 
-def _draw_gate(drawing: Drawing, bit_gate_rank: _types.BitRankType, operation,
+def _draw_gate(drawing: Drawing, bit_gate_rank: _types.BitRankType, instruction,
                show_clbits: bool, bit_mapping: dict) -> None:
     unitary_gate_names = set('xyzhst')
     supported_base_gates = unitary_gate_names | {'sdg', 'tdg'}
@@ -352,29 +352,29 @@ def _draw_gate(drawing: Drawing, bit_gate_rank: _types.BitRankType, operation,
     supported_gates = (supported_unitary_gates | supported_controlled_gates |
                        supported_special_gates)
 
-    name = operation['name']
-    qubits = operation['qubits']
+    name = instruction['name']
+    qubits = instruction['qubits']
     name_conditional_part = ""
 
-    if 'conditional' in operation:
+    if 'conditional' in instruction:
         if show_clbits:
             _draw_classically_conditioned_part(drawing, bit_gate_rank,
-                                               operation, bit_mapping)
+                                               instruction, bit_mapping)
         else:
             # TODO: Change 'c' by the name of the classical register.
             name_conditional_part = "[c={}]".format(
-                int(operation['conditional']['val'], 0))
+                int(instruction['conditional']['val'], 0))
 
     # Tag needed later
     drawing_controlled_gate = False
     # Compute the x coordinate of the gate.
     index_to_draw, _ = _helpers.get_max_index(bit_gate_rank,
-                                              operation=operation)
+                                              instruction=instruction)
 
     # If it is a measure gate then call the specialized function to draw it.
     if name == 'measure':
         _draw_measure_gate(drawing, bit_gate_rank, qubits[0],
-                           operation['clbits'][0], show_clbits, bit_mapping)
+                           instruction['clbits'][0], show_clbits, bit_mapping)
 
     # If it is a barrier gate then we do not draw anything
     if name == 'barrier':
@@ -420,7 +420,7 @@ def _draw_gate(drawing: Drawing, bit_gate_rank: _types.BitRankType, operation,
 
     # Draw the main gate.
     # 1. Special case for gates with parameters
-    if operation.get('params', None):
+    if instruction.get('params', None):
         def _round_numeric_param(numeric_param: float) -> str:
             if abs(numeric_param) < 1e-10:
                 # Avoid the "0.0"
@@ -431,7 +431,7 @@ def _draw_gate(drawing: Drawing, bit_gate_rank: _types.BitRankType, operation,
         _draw_unitary_gate(drawing, bit_gate_rank, qubits[0],
                            name + name_conditional_part + "({})".format(
                                ",".join(map(_round_numeric_param,
-                                            operation['params']))), bit_mapping,
+                                            instruction['params']))), bit_mapping,
                            is_controlled_gate=drawing_controlled_gate,
                            index_to_draw=index_to_draw)
 
@@ -443,13 +443,13 @@ def _draw_gate(drawing: Drawing, bit_gate_rank: _types.BitRankType, operation,
                            index_to_draw=index_to_draw)
 
     # Warn the user we encountered a non-implemented gate.
-    if operation['name'].lower() not in supported_gates:
-        print("WARNING: Gate '{}' is not implemented".format(operation['name']))
+    if instruction['name'].lower() not in supported_gates:
+        print("WARNING: Gate '{}' is not implemented".format(instruction['name']))
 
     # And finally take care of our data structure that keeps track of the
     # position
     # where we want to draw.
-    _helpers._update_data_structure(bit_gate_rank, operation)
+    _helpers._update_data_structure(bit_gate_rank, instruction)
 
 
 def _draw_registers_names_and_lines(drawing: Drawing, circuit_width: int,
@@ -591,7 +591,7 @@ def draw_json_circuit(json_circuit, unit: str = 'px', round_index: int = 0,
     # First the registers names and lines
     _draw_registers_names_and_lines(drawing, width, json_circuit, show_clbits)
     # And then each gate
-    for operation in json_circuit['operations']:
-        _draw_gate(drawing, index_last_gate_on_reg, operation, show_clbits,
+    for instruction in json_circuit['instructions']:
+        _draw_gate(drawing, index_last_gate_on_reg, instruction, show_clbits,
                    bit_mapping)
     return drawing.tostring(), (width, height)
